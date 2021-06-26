@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND (express or implied).
  */
 
-pragma solidity ^0.4.23;
+pragma solidity ^0.8.1;
 
 /**
  * @title MerkleAirdrop
@@ -28,7 +28,7 @@ contract MerkleAirdrop {
 
     // address of contract, having "transfer" function
     // airdrop contract must have ENOUGH TOKENS in its balance to perform transfer
-    MintableToken tokenContract;
+    MintableToken erc1155tokenContract;
 
     // fix already minted addresses
     mapping (address => bool) spent;
