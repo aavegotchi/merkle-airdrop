@@ -7,7 +7,8 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./interfaces/IMerkleDistributor.sol";
 
 contract MerkleDistributor is IMerkleDistributor,ERC1155Holder {
-    address public immutable override token;
+    
+    address public immutable token;
     bytes32 public immutable override merkleRoot;
 
     // This is a packed array of booleans.
@@ -26,7 +27,7 @@ contract MerkleDistributor is IMerkleDistributor,ERC1155Holder {
         claimed[_user]=true;
     }
     
-    function tokenAddress() external view returns (address){
+    function tokenAddress() external view override returns (address){
         return token;
     }
     
