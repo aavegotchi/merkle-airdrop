@@ -28,6 +28,7 @@ contract MerkleDistributor is ERC1155Holder {
     }
     
     event AirdropCreated(string name,uint256 id,address tokenAddress);
+    event Claimed(uint256 airdropID,address account, uint256 itemId,uint256 amount);
 
     constructor()  {
         owner=msg.sender;
@@ -61,7 +62,7 @@ contract MerkleDistributor is ERC1155Holder {
         if(airdropId>airdropCounter){
             revert("Airdrop is not created yet");
         }
-        Airdrop storage drop=Airdrops[airdropId];        
+        Airdrop storage drop=Airdrops[airdropId];
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(_account, _itemId, _amount));
         bytes32 merkleRoot=drop.merkleRoot;
@@ -72,11 +73,12 @@ contract MerkleDistributor is ERC1155Holder {
         IERC1155(token).safeTransferFrom(address(this),_account,_itemId,_amount,data);
         this.onERC1155Received(msg.sender,msg.sender,_itemId,_amount,data);
         //only emit when successful
-       // emit Claimed(_account,_itemId,_amount);
+        emit Claimed(airdropId,_account,_itemId,_amount);
     }
     
     function checkAirdropDetails(uint256 _airdropID) public view returns(Airdrop memory){
         return Airdrops[_airdropID];
     }
-
+   
+    
 }
