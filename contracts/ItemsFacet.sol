@@ -10,7 +10,11 @@ pragma solidity 0.8.1;
 /******************************************************************************/
 
 interface IDiamondCut {
-    enum FacetCutAction {Add, Replace, Remove}
+    enum FacetCutAction {
+        Add,
+        Replace,
+        Remove
+    }
 
     struct FacetCut {
         address facetAddress;
@@ -33,9 +37,7 @@ interface IDiamondCut {
     event DiamondCut(FacetCut[] _diamondCut, address _init, bytes _calldata);
 }
 
-
 // File contracts/shared/interfaces/IDiamondLoupe.sol
-
 
 pragma solidity 0.8.1;
 
@@ -70,9 +72,7 @@ interface IDiamondLoupe {
     function facetAddress(bytes4 _functionSelector) external view returns (address facetAddress_);
 }
 
-
 // File contracts/shared/interfaces/IERC165.sol
-
 
 pragma solidity 0.8.1;
 
@@ -86,9 +86,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-
 // File contracts/shared/interfaces/IERC173.sol
-
 
 pragma solidity 0.8.1;
 
@@ -106,9 +104,7 @@ interface IERC173 {
     function transferOwnership(address _newOwner) external;
 }
 
-
 // File contracts/shared/libraries/LibMeta.sol
-
 
 pragma solidity 0.8.1;
 
@@ -142,9 +138,7 @@ library LibMeta {
     }
 }
 
-
 // File contracts/shared/libraries/LibDiamond.sol
-
 
 pragma solidity 0.8.1;
 
@@ -152,10 +146,6 @@ pragma solidity 0.8.1;
 * Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
 * EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535
 /******************************************************************************/
-
-
-
-
 
 library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
@@ -381,9 +371,7 @@ library LibDiamond {
     }
 }
 
-
 // File contracts/Aavegotchi/interfaces/ILink.sol
-
 
 pragma solidity 0.8.1;
 
@@ -421,13 +409,9 @@ interface ILink {
     ) external returns (bool success);
 }
 
-
 // File contracts/Aavegotchi/libraries/LibAppStorage.sol
 
-
 pragma solidity 0.8.1;
-
-
 
 //import "../interfaces/IERC20.sol";
 // import "hardhat/console.sol";
@@ -719,9 +703,7 @@ contract Modifiers {
     }
 }
 
-
 // File contracts/shared/interfaces/IERC1155TokenReceiver.sol
-
 
 pragma solidity 0.8.1;
 
@@ -772,9 +754,7 @@ interface IERC1155TokenReceiver {
     ) external returns (bytes4);
 }
 
-
 // File contracts/shared/libraries/LibERC1155.sol
-
 
 pragma solidity 0.8.1;
 
@@ -860,12 +840,9 @@ library LibERC1155 {
     }
 }
 
-
 // File contracts/Aavegotchi/libraries/LibItems.sol
 
-
 pragma solidity 0.8.1;
-
 
 struct ItemTypeIO {
     uint256 balance;
@@ -1001,9 +978,7 @@ library LibItems {
     }
 }
 
-
 // File contracts/shared/interfaces/IERC20.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1031,9 +1006,7 @@ interface IERC20 {
     function allowance(address _owner, address _spender) external view returns (uint256 remaining);
 }
 
-
 // File contracts/shared/libraries/LibERC20.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1088,9 +1061,7 @@ library LibERC20 {
     }
 }
 
-
 // File contracts/shared/interfaces/IERC721.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1189,9 +1160,7 @@ interface IERC721 {
     function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 }
 
-
 // File contracts/shared/interfaces/IERC721TokenReceiver.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1217,9 +1186,7 @@ interface IERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-
 // File contracts/shared/libraries/LibERC721.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1263,17 +1230,9 @@ library LibERC721 {
     }
 }
 
-
 // File contracts/Aavegotchi/libraries/LibAavegotchi.sol
 
-
 pragma solidity 0.8.1;
-
-
-
-
-
-
 
 struct AavegotchiCollateralTypeIO {
     address collateralType;
@@ -1622,16 +1581,14 @@ library LibAavegotchi {
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
 
-  /*  function verify(uint256 _tokenId) internal pure {
+    /*  function verify(uint256 _tokenId) internal pure {
        // if (_tokenId < 10) {}
        // revert("Not verified");
     }
     */
 }
 
-
 // File contracts/shared/libraries/LibStrings.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1668,14 +1625,9 @@ library LibStrings {
         }
         return string(abi.encodePacked(_str, buffer));
     }
-
-
-
 }
 
-
 // File contracts/shared/interfaces/IERC1155.sol
-
 
 pragma solidity 0.8.1;
 
@@ -1765,12 +1717,9 @@ interface IERC1155 {
     function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 }
 
-
 // File contracts/Aavegotchi/libraries/LibERC1155Marketplace.sol
 
-
 pragma solidity 0.8.1;
-
 
 // import "hardhat/console.sol";
 
@@ -1899,17 +1848,9 @@ library LibERC1155Marketplace {
     }
 }
 
-
 // File contracts/Aavegotchi/facets/ItemsFacet.sol
 
-
 pragma solidity 0.8.1;
-
-
-
-
-
-
 
 // import "hardhat/console.sol";
 
@@ -2030,28 +1971,28 @@ contract ItemsFacet is Modifiers {
     }
 
     function findWearableSets(uint256[] calldata _wearableIds) external view returns (uint256[] memory wearableSetIds_) {
-        unchecked {                    
+        unchecked {
             uint256 length = s.wearableSets.length;
             wearableSetIds_ = new uint256[](length);
             uint256 count;
-            for(uint256 i; i < length; i++) {
+            for (uint256 i; i < length; i++) {
                 uint16[] memory setWearableIds = s.wearableSets[i].wearableIds;
                 bool foundSet = true;
-                for(uint256 j; j < setWearableIds.length; j++) {
+                for (uint256 j; j < setWearableIds.length; j++) {
                     uint256 setWearableId = setWearableIds[j];
                     bool foundWearableId = false;
-                    for(uint256 k; k < _wearableIds.length; k++) {
-                        if(_wearableIds[k] == setWearableId) {
+                    for (uint256 k; k < _wearableIds.length; k++) {
+                        if (_wearableIds[k] == setWearableId) {
                             foundWearableId = true;
                             break;
                         }
                     }
-                    if(foundWearableId == false) {
+                    if (foundWearableId == false) {
                         foundSet = false;
                         break;
                     }
                 }
-                if(foundSet) {
+                if (foundSet) {
                     wearableSetIds_[count] = i;
                     count++;
                 }
