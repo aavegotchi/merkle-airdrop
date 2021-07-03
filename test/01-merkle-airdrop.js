@@ -1,151 +1,160 @@
-'use strict';
-import {sha3, bufferToHex} from 'ethereumjs-util';
+const { expect } = require('chai')
+const { ethers } = require('hardhat')
+const truffleAsserts = require('truffle-assertions')
+//const {allOps} = require('../scripts/generate_merkle_tree.js');
 
-import Web3 from 'web3'
-const web3 = new Web3()
-const fs = require('fs');
-
-import assertBnEq from '../test/helpers/assertBigNumbersEqual';
-import MerkleTree from '../test/helpers/merkleTree';
-import expectThrow from '../test/helpers/expectThrow';
-
-const MerkleAirdrop = artifacts.require("MerkleAirdrop.sol");
-
-const MintableToken = artifacts.require("openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol");
-
-const l = console.log;
-
-contract('MerkleAirdrop', function(accs) {
-
-    const roles =  {
-        owner: accs[0],
-		user1: accs[1],
-		user2: accs[2],
-		user3: accs[3],
-		user4: accs[4],
-        nobody1: accs[5],
-        nobody2: accs[6],
-        nobody3: accs[7],
-        nobody4: accs[8],
-        nobody5: accs[9],
-	};
+describe('Test merkle', async function () {
+  this.timeout(300000)
+  const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+  const minter= '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
 
 
-	// create token contract, mint some tokens and give them to airdrop contract
-	const TOTAL_TOKENS_FOR_AIRDROP = 1000000;// new BigNumber(1000);
-	const NUM_TOKENS_PER_USER = 10;
-	let mintableToken;
-	let merkleAirdrop;
-	let leafsArray = [];
-	let merkleTree;
-	let merkleRootHex;
+  //will be changed according to generated tree
+  let currentRoot= '0x976f83a7cbbc0f173c37574ede2dc7ea66b7277c1dee66e3354c1ccfbffc331d'
 
-	function generateLeafs(n) {
-		let leafs = [];
-		for(let i=0; i < n; i++) {
-			let acc = web3.eth.accounts.create(""+i);
-			// lowercase is important!
-			leafs.push('' + acc.address.toLowerCase() + ' ' + 100);
-		}
-		return leafs;
-	}
+  let recipient1Object= {
+	leaf: "0x1f5128a820683f23d2c09ba94161b7b38add2f0a8f1aa0d43c81110045690002",
+	proof: [
+		"0xe64d0d7e49ad28434c85290ef97d35f66aab6408f87cc19b5991d3e9ac3d0b25",
+		"0x87d59cadeb17b5117f73ad826691a7f1a03cea1e617ec7f16937f751aebc397c",
+		"0x68e0ceaa65ed249cd00c8e4bfba3317ee908511f8e6307b7cfbb8f25960137d6"
+	]
+,
+	itemId: 33,
+	amountToClaim: 3
 
-	const CANCELABLE = false;
 
-   it("generates many addresses(of file optionally) for test, reads them and builds merkleTree", async function() {
-   		// return true;
-        this.timeout(10000);
+}
 
-        leafsArray = generateLeafs(4);
-		leafsArray.push(roles.user1 + ' 100');
-		leafsArray.push(roles.user2 + ' 88');
-		leafsArray.push(roles.user3 + ' 99');
-		leafsArray.push(roles.user4 + ' 66');
-        merkleTree = new MerkleTree(leafsArray);
-        merkleRootHex = merkleTree.getHexRoot();
+let recipient2Object= {
+	leaf: "0xe64d0d7e49ad28434c85290ef97d35f66aab6408f87cc19b5991d3e9ac3d0b25",
+	proof: [
+		"0x1f5128a820683f23d2c09ba94161b7b38add2f0a8f1aa0d43c81110045690002",
+		"0x87d59cadeb17b5117f73ad826691a7f1a03cea1e617ec7f16937f751aebc397c",
+		"0x68e0ceaa65ed249cd00c8e4bfba3317ee908511f8e6307b7cfbb8f25960137d6"
+	],
+	itemId: 34,
+	amountToClaim: 5
 
-		// uncomment here to receive a file with addresses, similar to real file, provided by user
-		// be careful with big list sizes, use concatenation to join them
-        // let data = leafsArray.join("\n");
-        // fs.writeFileSync(merkleRootHex, data);
-	});
+}
 
-	it("tests deployment of airdrop contract and minting tokens for airdrop", async function() {
-		// deploy token contract, then give many tokens to deployed airdrop contract.
-		mintableToken = await MintableToken.new({from: roles.owner});
-		merkleAirdrop = await MerkleAirdrop.new(mintableToken.address, merkleRootHex, CANCELABLE, {from: roles.owner});
-		assert.equal(await merkleAirdrop.merkleRoot(), merkleTree.getHexRoot());
 
-		await mintableToken.mint(merkleAirdrop.address, TOTAL_TOKENS_FOR_AIRDROP, {from: roles.owner});
-		assert.equal(await merkleAirdrop.contractTokenBalance(), TOTAL_TOKENS_FOR_AIRDROP,);
-    });
 
- 	it("tests for success mint for allowed set of users", async function() {
-		// check correctness of mint for each in leafsArray
-		for(let i = 0; i < leafsArray.length; i++) {
 
-			// string like "0x821aea9a577a9b44299b9c15c88cf3087f3b5544 99000000"
-			let leaf = leafsArray[i];
+  let recipient1='0x15290cd9955154de5d18E0Cc1ef375bb7f9F2e26'
+  let recipient2='0x805b01E7F3Fe127769B249763250222630968b4d'
+  let itemsToMint=[33,34]//Stani hair,Stani vest
+  let amount=[5,5]
+  //current root
 
-			let merkle_proof = await merkleTree.getHexProof(leaf);
-			
-			// await l("For string '" + leaf + "', and leaf: '" + '0x' + sha3(leaf).toString('hex') + "' generated proof: " + JSON.stringify(merkle_proof) );
-			let userAddress = leaf.split(" ")[0];
-			let numTokens = leaf.split(" ")[1];
+let airdropContract,
+recipient,
+gotchiFacet,
+daoFacet,
+itemsFacet,
+airdropAdd,
+owner,
+airdropContract1,
+airdropContract2
 
-			let airdropContractBalance = await mintableToken.balanceOf(merkleAirdrop.address);
-			let userTokenBalance = await mintableToken.balanceOf(userAddress);
+before(async function () {
+gotchiFacet= await ethers.getContractAt('AavegotchiFacet',diamondAddress)
+daoFacet= await ethers.getContractAt('DAOFacet',diamondAddress)
+itemsFacet= await ethers.getContractAt('ItemsFacet',diamondAddress)
+owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
 
-			assert.isOk(await merkleAirdrop.getTokensByMerkleProof(merkle_proof, userAddress, numTokens), 'getTokensByMerkleProof() did not return true for a valid proof');
 
-			assertBnEq(await mintableToken.balanceOf(merkleAirdrop.address), airdropContractBalance.minus(numTokens), "balance of airdrop contract was not decreased by numTokens");
-			assertBnEq(await mintableToken.balanceOf(userAddress), userTokenBalance.plus(numTokens), "balance of user was not increased by numTokens");
-		}
-	});
+})
 
- 	it("tests for success mint for newly added users", async function() {
-		leafsArray.push(roles.nobody1 + ' 31');
-		leafsArray.push(roles.nobody2 + ' 32');
-		leafsArray.push(roles.nobody3 + ' 33');
-		leafsArray.push(roles.nobody4 + ' 34');
 
-		merkleTree = new MerkleTree(leafsArray);
-        merkleRootHex = merkleTree.getHexRoot();
-      	await merkleAirdrop.setRoot(merkleRootHex);
-		let newRoot = await merkleAirdrop.merkleRoot();
-      	assert.equal(newRoot, merkleRootHex, "updated merkle root '" + merkleRootHex, "' was not set in contract");
+describe('deploy airdrop contract', async function(){
 
-		// check minting for new addresses (nobody1 and nobody2, added in previous test)
 
-		let leaf = roles.nobody1 + ' 31';
-		let merkle_proof = await merkleTree.getHexProof(leaf);
-		// await l("For string '" + leaf + "', and leaf: '" + '0x' + sha3(leaf).toString('hex') + "' generated proof: " + JSON.stringify(merkle_proof) );
-		let userAddress = leaf.split(" ")[0];
-		let numTokens = leaf.split(" ")[1];
+it('should deploy merkle contract correctly',async function(){
+const airdrop= await ethers.getContractFactory("MerkleDistributor");
+airdropContract=await airdrop.deploy(diamondAddress,currentRoot);
+airdropAdd=airdropContract.address
+console.log(airdropAdd) 
+const currentMerkleRoot=await airdropContract.rootHash();
+const itemAddress=await airdropContract.tokenAddress();
+expect(currentMerkleRoot).to.equal(currentRoot)
+expect(itemAddress).to.equal(diamondAddress)
+})
 
-		let airdropContractBalance = await mintableToken.balanceOf(merkleAirdrop.address);
-		let userTokenBalance = await mintableToken.balanceOf(userAddress);
+it('should mint two wearable items to the merkle distributor contract',async function(){
+await hre.network.provider.request({
+		method: "hardhat_impersonateAccount",
+		params: [owner]
+	  });
+let ownerSign=await ethers.getSigner(owner);
+let daoOwnerConnect= await daoFacet.connect(ownerSign)
+//add the minter as an itemManager
+await daoOwnerConnect.addItemManagers([minter])
 
-		assert.isOk(await merkleAirdrop.getTokensByMerkleProof(merkle_proof, userAddress, numTokens), 'getTokensByMerkleProof() did not return true for a valid proof');
-		assertBnEq(await mintableToken.balanceOf(merkleAirdrop.address), airdropContractBalance.minus(numTokens), "balance of airdrop contract was not decreased by numTokens");
-		assertBnEq(await mintableToken.balanceOf(userAddress), userTokenBalance.plus(numTokens), "balance of user was not increased by numTokens");
-    });
+await hre.network.provider.request({
+	method: "hardhat_stopImpersonatingAccount",
+	params: [owner]
+  });
 
- 	//if (CANCELABLE == true) {
-	it("tests for claiming all tokens on contract's balance and selfdestruct", async function() {
-	let startAirdropContractBalance = await mintableToken.balanceOf(merkleAirdrop.address)
-	let startUserBalance = await mintableToken.balanceOf(roles.owner);
+  await hre.network.provider.request({
+	method: "hardhat_impersonateAccount",
+	params: [minter]
+  });
+let minterSign=await ethers.getSigner(minter)
+let daoMinterConnect= await daoFacet.connect(minterSign)
+await daoMinterConnect.updateItemTypeMaxQuantity(itemsToMint,[100,100])
+const mintItems=await daoMinterConnect.mintItems(airdropAdd,itemsToMint,amount)
+const item33balance= await itemsFacet.balanceOf(airdropAdd,33)
+const item34balance= await itemsFacet.balanceOf(airdropAdd,34)
+expect(item33balance.toString()).to.equal('5')
+expect(item34balance.toString()).to.equal('5')
 
-	await expectThrow(merkleAirdrop.claim_rest_of_tokens_and_selfdestruct({from: roles.user1}), 'claiming rest of tokens by not owner did not broke call');
-	assert.isOk(await merkleAirdrop.claim_rest_of_tokens_and_selfdestruct({from: roles.owner}), 'claiming rest of tokens by owner did not return true');
-	assertBnEq(await mintableToken.balanceOf(roles.owner), startUserBalance.plus(startAirdropContractBalance), "balance of owned was not increased after caliming all rest of tokens");
-	assertBnEq(await mintableToken.balanceOf(merkleAirdrop.address), 0, "balance of contract after claiming tokens not zero");
-	});
-	//} else {
-	it("test for tokens claiming method-call revert", async function () {
-		await expectThrow(merkleAirdrop.claim_rest_of_tokens_and_selfdestruct({from: roles.owner}), 'claiming is forbidden in this contract');
-	});
-	//}
-	// [FIXME] [FIXME] add more and more tests!!!
+})
 
-});
+it('should allow the users to claim their assigned wearables', async function(){
+	await hre.network.provider.request({
+		method: "hardhat_stopImpersonatingAccount",
+		params: [minter]
+	  });
+	  await hre.network.provider.request({
+		method: "hardhat_impersonateAccount",
+		params: [recipient1]
+	  });
+let rec1sign=await ethers.getSigner(recipient1)
+let rec2sign=await ethers.getSigner(recipient2) 
+airdropContract1=await airdropContract.connect(rec1sign)
+airdropContract2=await airdropContract.connect(rec2sign)
+await airdropContract1.claim(recipient1,recipient1Object.itemId,recipient1Object.amountToClaim,recipient1Object.proof,"0x00")
+await hre.network.provider.request({
+	method: "hardhat_stopImpersonatingAccount",
+	params: [recipient1]
+  });
+  await hre.network.provider.request({
+	method: "hardhat_impersonateAccount",
+	params: [recipient2]
+  });
+  await airdropContract2.claim(recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00")
+const item33balance= await itemsFacet.balanceOf(recipient1,33)
+const item34balance= await itemsFacet.balanceOf(recipient2,34)
+//contract balances
+const Citem33balance= await itemsFacet.balanceOf(airdropAdd,33)
+const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
+
+  expect(item33balance.toString()).to.equal('3')
+  expect(item34balance.toString()).to.equal('5')
+  //make sure they are reduced
+  expect(Citem33balance.toString()).to.equal('2')
+  expect(Citem34balance.toString()).to.equal('0')
+
+})
+
+
+it('should revert while trying to claim more than once',async function(){
+await truffleAsserts.reverts(airdropContract2.claim(recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00"),'MerkleDistributor: Drop already claimed.');
+
+})
+
+
+})
+
+})
