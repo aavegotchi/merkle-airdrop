@@ -71,7 +71,6 @@ contract MerkleDistributor is ERC1155Holder {
         // Mark it claimed and send the token.
         _setClaimed(_account,airdropId);
         IERC1155(token).safeTransferFrom(address(this),_account,_itemId,_amount,data);
-        this.onERC1155Received(msg.sender,msg.sender,_itemId,_amount,data);
         //only emit when successful
         emit Claimed(airdropId,_account,_itemId,_amount);
     }
