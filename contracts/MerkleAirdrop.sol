@@ -6,51 +6,77 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./interfaces/IMerkleDistributor.sol";
 
-contract MerkleDistributor is IMerkleDistributor,ERC1155Holder {
+contract MerkleDistributor is ERC1155Holder {
     
-    address public immutable token;
-    bytes32 public immutable override merkleRoot;
-
-    // This is a packed array of booleans.
-    mapping(address => bool) public claimed;
-
-    constructor(address token_, bytes32 merkleRoot_)  {
-        token = token_;
-        merkleRoot = merkleRoot_;
+    struct Airdrop{
+        string name;
+        uint256 airdropID;
+        bytes32 merkleRoot;
+        address tokenAddress;
+        uint256 maxUsers;
+        uint256[] tokenIDs;
     }
-
-    function isClaimed(address _user) public view override returns (bool) {
-        return claimed[_user];
-    }
-
-    function _setClaimed(address _user) private {
-        claimed[_user]=true;
-    }
+  
+    address public owner;
+    uint256 public airdropCounter;
+    mapping(uint256=>Airdrop) public Airdrops;
+    mapping(address=>mapping(uint256 => bool)) public claimed;
     
-    function tokenAddress() external view override returns (address){
-        return token;
+    modifier notClaimed(address user,uint _airdropID) {
+        require(claimed[user][_airdropID]==false,"MerkleDistributor: Drop already claimed or address not included.");
+        _;
     }
     
-     function rootHash() external view returns (bytes32){
-         return merkleRoot;
-     }
-     
+    event AirdropCreated(string name,uint256 id,address tokenAddress);
 
-    function claim( address _account,uint256 _itemId ,uint256 _amount, bytes32[] calldata merkleProof,bytes calldata data ) external override {
-        require(!isClaimed(_account), 'MerkleDistributor: Drop already claimed.');
+    constructor()  {
+        owner=msg.sender;
+    }
+    
+    function addAirdrop(string memory airdropName,bytes32 _merkleRoot,address _tokenAddress,uint256 MAX,uint256[] calldata _tokenIDs) public returns(string memory,address){
+        require(msg.sender==owner,"You are not the contract owner");
+        Airdrop storage drop=Airdrops[airdropCounter];
+        drop.name=airdropName;
+        drop.airdropID=airdropCounter;
+        drop.merkleRoot=_merkleRoot;
+        drop.tokenAddress=_tokenAddress;
+        drop.maxUsers=MAX;
+        drop.tokenIDs=_tokenIDs;
+        emit AirdropCreated(airdropName,airdropCounter,_tokenAddress);
+        airdropCounter++;
+        return(airdropName,_tokenAddress);
+       
+        
+    }
+
+    function isClaimed(address _user,uint256 _airdropID) public view returns (bool) {
+        return claimed[_user][_airdropID];
+    }
+
+    function _setClaimed(address _user,uint256 _airdropID) private {
+       claimed[_user][_airdropID]=true;
+    }
+
+    function claim(uint256 airdropId, address _account,uint256 _itemId ,uint256 _amount, bytes32[] calldata merkleProof,bytes calldata data ) external notClaimed(_account,airdropId) {
+        if(airdropId>airdropCounter){
+            revert("Airdrop is not created yet");
+        }
+        Airdrop storage drop=Airdrops[airdropId];        
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(_account, _itemId, _amount));
+        bytes32 merkleRoot=drop.merkleRoot;
+        address token=drop.tokenAddress;
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'MerkleDistributor: Invalid proof.');
-
         // Mark it claimed and send the token.
-        _setClaimed(_account);
+        _setClaimed(_account,airdropId);
         IERC1155(token).safeTransferFrom(address(this),_account,_itemId,_amount,data);
         this.onERC1155Received(msg.sender,msg.sender,_itemId,_amount,data);
-        //onERC1155Received(msg.sender,msg.sender,_itemId, _amount,data) (bytes4);
         //only emit when successful
-        emit Claimed(_account,_itemId,_amount);
+       // emit Claimed(_account,_itemId,_amount);
     }
     
-   
-    
+    function checkAirdropDetails(uint256 _airdropID) public view returns(Airdrop memory){
+        return Airdrops[_airdropID];
+    }
+
 }

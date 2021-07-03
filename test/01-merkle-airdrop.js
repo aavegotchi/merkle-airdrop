@@ -4,9 +4,10 @@ const truffleAsserts = require('truffle-assertions')
 //const {allOps} = require('../scripts/generate_merkle_tree.js');
 
 describe('Test merkle', async function () {
-  this.timeout(300000)
+  this.timeout(300000000)
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   const minter= '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
+  let minterSign=await ethers.getSigner(minter)
 
 
   //will be changed according to generated tree
@@ -58,6 +59,7 @@ airdropContract1,
 airdropContract2
 
 before(async function () {
+	this.timeout(300000)
 gotchiFacet= await ethers.getContractAt('AavegotchiFacet',diamondAddress)
 daoFacet= await ethers.getContractAt('DAOFacet',diamondAddress)
 itemsFacet= await ethers.getContractAt('ItemsFacet',diamondAddress)
@@ -67,20 +69,35 @@ owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).own
 })
 
 
-describe('deploy airdrop contract', async function(){
+describe('deploy airdrop contract ', async function(){
+	this.timeout(3000000)
 
+it('should deploy merkle contract and add the first airdrop correctly',async function(){
 
-it('should deploy merkle contract correctly',async function(){
-const airdrop= await ethers.getContractFactory("MerkleDistributor");
-airdropContract=await airdrop.deploy(diamondAddress,currentRoot);
+	await hre.network.provider.request({
+		method: "hardhat_impersonateAccount",
+		params: [minter]
+	  });
+
+const airdrop= await(await ethers.getContractFactory("MerkleDistributor")).connect(minterSign);
+airdropContract=await airdrop.deploy();
 airdropAdd=airdropContract.address
-console.log(airdropAdd) 
-const currentMerkleRoot=await airdropContract.rootHash();
-const itemAddress=await airdropContract.tokenAddress();
-expect(currentMerkleRoot).to.equal(currentRoot)
-expect(itemAddress).to.equal(diamondAddress)
-})
+console.log('airdrop contract deployed to:',airdropAdd)
+await airdropContract.addAirdrop('For Stani fans',currentRoot,diamondAddress,10,itemsToMint)
+const details=await airdropContract.checkAirdropDetails(0)
+expect(details.name).to.equal('For Stani fans')
+expect((details.airdropID).toString()).to.equal('0')
+expect(details.merkleRoot).to.equal(currentRoot)
+expect(details.tokenAddress).to.equal(diamondAddress)
+expect((details.maxUsers).toString()).to.equal('10')
+expect((details.tokenIDs).toString()).to.equal((itemsToMint).toString())
+await hre.network.provider.request({
+	method: "hardhat_stopImpersonatingAccount",
+	params: [minter]
+  });
 
+})
+ 
 it('should mint two wearable items to the merkle distributor contract',async function(){
 await hre.network.provider.request({
 		method: "hardhat_impersonateAccount",
@@ -100,10 +117,10 @@ await hre.network.provider.request({
 	method: "hardhat_impersonateAccount",
 	params: [minter]
   });
-let minterSign=await ethers.getSigner(minter)
+
 let daoMinterConnect= await daoFacet.connect(minterSign)
 await daoMinterConnect.updateItemTypeMaxQuantity(itemsToMint,[100,100])
-const mintItems=await daoMinterConnect.mintItems(airdropAdd,itemsToMint,amount)
+await daoMinterConnect.mintItems(airdropAdd,itemsToMint,amount)
 const item33balance= await itemsFacet.balanceOf(airdropAdd,33)
 const item34balance= await itemsFacet.balanceOf(airdropAdd,34)
 expect(item33balance.toString()).to.equal('5')
@@ -124,7 +141,7 @@ let rec1sign=await ethers.getSigner(recipient1)
 let rec2sign=await ethers.getSigner(recipient2) 
 airdropContract1=await airdropContract.connect(rec1sign)
 airdropContract2=await airdropContract.connect(rec2sign)
-await airdropContract1.claim(recipient1,recipient1Object.itemId,recipient1Object.amountToClaim,recipient1Object.proof,"0x00")
+await airdropContract1.claim(0,recipient1,recipient1Object.itemId,recipient1Object.amountToClaim,recipient1Object.proof,"0x00")
 await hre.network.provider.request({
 	method: "hardhat_stopImpersonatingAccount",
 	params: [recipient1]
@@ -133,7 +150,7 @@ await hre.network.provider.request({
 	method: "hardhat_impersonateAccount",
 	params: [recipient2]
   });
-  await airdropContract2.claim(recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00")
+  await airdropContract2.claim(0,recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00")
 const item33balance= await itemsFacet.balanceOf(recipient1,33)
 const item34balance= await itemsFacet.balanceOf(recipient2,34)
 //contract balances
@@ -150,7 +167,7 @@ const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
 
 
 it('should revert while trying to claim more than once',async function(){
-await truffleAsserts.reverts(airdropContract2.claim(recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00"),'MerkleDistributor: Drop already claimed.');
+await truffleAsserts.reverts(airdropContract2.claim(0,recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00"),'MerkleDistributor: Drop already claimed or address not included.');
 
 })
 
