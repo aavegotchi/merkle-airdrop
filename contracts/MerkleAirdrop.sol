@@ -22,7 +22,7 @@ contract MerkleDistributor is ERC1155Holder {
     mapping(uint256=>Airdrop) public Airdrops;
     mapping(address=>mapping(uint256 => bool)) public claimed;
     
-    modifier notClaimed(address user,uint _airdropID) {
+    modifier onlyUnclaimed(address user,uint _airdropID) {
         require(claimed[user][_airdropID]==false,"MerkleDistributor: Drop already claimed or address not included.");
         _;
     }
@@ -58,7 +58,7 @@ contract MerkleDistributor is ERC1155Holder {
        claimed[_user][_airdropID]=true;
     }
 
-    function claim(uint256 airdropId, address _account,uint256 _itemId ,uint256 _amount, bytes32[] calldata merkleProof,bytes calldata data ) external notClaimed(_account,airdropId) {
+    function claim(uint256 airdropId, address _account,uint256 _itemId ,uint256 _amount, bytes32[] calldata merkleProof,bytes calldata data ) external onlyUnclaimed(_account,airdropId) {
         if(airdropId>airdropCounter){
             revert("Airdrop is not created yet");
         }
