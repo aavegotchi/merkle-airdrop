@@ -24,7 +24,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: 'https://polygon-mainnet.infura.io/v3/80ddd93e5e194b11ac8279036bc49d97',
+        url: process.env.MATIC_URL,
         timeout: 120000
       }
     },
