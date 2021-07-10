@@ -46,6 +46,7 @@ fs.createReadStream(filename)
   function write_leaves(merkle_tree, user_dist_list, token_dist, root) {
     console.log('Begin writing leaves to file...')
     full_dist = {}
+    full_user_claim={}
     for (line = 0; line < user_dist_list.length; line++) {
         // generate leaf hash from raw data
         const leaf = (token_dist[line]);
@@ -58,14 +59,27 @@ fs.createReadStream(filename)
         // add record to our distribution 
         full_dist[user_dist_list[line][0]] = user_dist;
     } 
+
     fs.writeFile(output_file, JSON.stringify(full_dist, null, 4), (err) => {
         if (err) {
             console.error(err);
             return;
         };
 
+        for (line = 0; line < user_dist_list.length; line++) {  
+          const other= (user_dist_list[line]);
+         // console.log(gotchi_dist_list[line])
+          const user_claim={
+             address: other[0],
+             itemID: other[1],
+             amount: other[2]
+  
+          }
+          full_user_claim[user_dist_list[line][0]]=user_claim;
+        }
         //append to airdrop list to have comprehensive overview
-        fs.writeFile(userclaimFile,JSON.stringify(user_dist_list,null,4),(err)=>{
+        fs.writeFile(userclaimFile,JSON.stringify(full_user_claim,null,4),(err)=>{
+          
           if (err) {
             console.error(err);
             return;
