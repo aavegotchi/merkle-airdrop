@@ -122,6 +122,22 @@ contract MerkleDistributor is ERC1155Holder {
         addressClaims[_user][_airdropID] = true;
     }
 
+    function areGotchisClaimed(uint256[] memory gotchiIds, uint256 airdropID) public view returns (bool[] memory) {
+        if (airdropID > airdropCounter) {
+            revert("Airdrop is not created yet");
+        }
+        bool[] memory gStat = new bool[](gotchiIds.length);
+        for (uint256 i; i < gotchiIds.length; i++) {
+            if (isGotchiClaimed(airdropID, gotchiIds[i])) {
+                gStat[i] = false;
+            }
+            if (!(isGotchiClaimed(airdropID, gotchiIds[i]))) {
+                gStat[i] = true;
+            }
+        }
+        return gStat;
+    }
+
     function _setGotchiClaimed(uint256 tokenId, uint256 _airdropID) private {
         gotchiClaims[tokenId][_airdropID] = true;
     }
@@ -171,6 +187,7 @@ contract MerkleDistributor is ERC1155Holder {
         address itemContract = drop.tokenAddress;
         for (uint256 index; index < tokenIds.length; index++) {
             //using a temporary struct to avoid stack too deep errors
+            // uint256[] storage ineligibleGotchis;
             gotchiClaimDetails memory g;
             g.tokenId = tokenIds[index];
             g.amount = _amounts[index];

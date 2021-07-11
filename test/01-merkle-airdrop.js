@@ -122,9 +122,13 @@ expect((details.maxUsers).toString()).to.equal('10')
 expect((details.itemIDs).toString()).to.equal((itemsToMint).toString())
 })
 
-it('should add the first gotchi airdrop correctly',async function(){
+it('should add the first gotchi airdrop correctly and return that the gotchis have not claimed',async function(){
 await airdropContract.addGotchiAirdrop('For Stani Fans',currentRoot2,diamondAddress,7,itemsToMint)
+const gotchiEv=await airdropContract.areGotchisClaimed([3410,6845],1)
+console.log(gotchiEv)
 const details=await airdropContract.checkGotchiAirdropDetails(1)
+expect(gotchiEv[0]).to.equal(true)
+expect(gotchiEv[1]).to.equal(true)
 expect(details.name).to.equal('For Stani Fans')
 expect((details.airdropID).toString()).to.equal('1')
 expect(details.merkleRoot).to.equal(currentRoot2)
@@ -239,11 +243,15 @@ const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
 })
 
 it('balance should remain unchanged without reverting if gotchi(s) has been claimed before',async function(){
-	await airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof])
+	const returns=await airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof])
 //	const details=await airdropContract.checkGotchiAirdropDetails(1)
 //	await truffleAsserts.reverts(airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof]),"MerkleDistributor: Drop already claimed or gotchi not included.")
 	const item33balance= await itemsFacet.balanceOfToken(diamondAddress,gotchi2,33)
 const item34balance= await itemsFacet.balanceOfToken(diamondAddress,gotchi1,34)
+
+const itemEv=await airdropContract.areGotchisClaimed([gotchi1,gotchi2],1)
+expect(itemEv[0]).to.equal(false);
+expect(itemEv[1]).to.equal(false);
 //contract balances
 const Citem33balance= await itemsFacet.balanceOf(airdropAdd,33)
 const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
