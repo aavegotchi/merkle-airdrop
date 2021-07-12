@@ -108,11 +108,11 @@ it('should deploy merkle contract and add the first address airdrop correctly',a
 	  });
 
 const airdrop= await(await ethers.getContractFactory("MerkleDistributor")).connect(minterSign);
-airdropContract=await airdrop.deploy();
+airdropContract=await airdrop.deploy("0x86935F11C86623deC8a25696E1C19a8659CbF95d");
 airdropAdd=airdropContract.address
 //console.log('airdrop contract deployed to:',airdropAdd)
 await airdropContract.addAddressAirdrop('For Stani fans',currentRoot1,diamondAddress,10,itemsToMint)
-const details=await airdropContract.checkAddressAirdropDetails(0)
+const details=await airdropContract.getAddressAirdrop(0)
 //console.log('address airdrop details',details)
 expect(details.name).to.equal('For Stani fans')
 expect((details.airdropID).toString()).to.equal('0')
@@ -126,7 +126,7 @@ it('should add the first gotchi airdrop correctly and return that the gotchis ha
 await airdropContract.addGotchiAirdrop('For Stani Fans',currentRoot2,diamondAddress,7,itemsToMint)
 const gotchiEv=await airdropContract.areGotchisClaimed([3410,6845],1)
 console.log(gotchiEv)
-const details=await airdropContract.checkGotchiAirdropDetails(1)
+const details=await airdropContract.getGotchiAirdrop(1)
 expect(gotchiEv[0]).to.equal(true)
 expect(gotchiEv[1]).to.equal(true)
 expect(details.name).to.equal('For Stani Fans')
@@ -225,7 +225,7 @@ it('should allow any address to claim wearables for eligible gotchis', async fun
 let rec1sign=await ethers.getSigner(recipient1) 
 airdropContract1=await airdropContract.connect(rec1sign)
 const claimFor=await airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof])
-const details=await airdropContract.checkGotchiAirdropDetails(1)
+const details=await airdropContract.getGotchiAirdrop(1)
 //console.log(deets.events)
 //console.log(details)
 const item33balance= await itemsFacet.balanceOfToken(diamondAddress,gotchi2,33)
@@ -244,7 +244,7 @@ const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
 
 it('balance should remain unchanged without reverting if gotchi(s) has been claimed before',async function(){
 	const returns=await airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof])
-//	const details=await airdropContract.checkGotchiAirdropDetails(1)
+//	const details=await airdropContract.getGotchiAirdrop(1)
 //	await truffleAsserts.reverts(airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof]),"MerkleDistributor: Drop already claimed or gotchi not included.")
 	const item33balance= await itemsFacet.balanceOfToken(diamondAddress,gotchi2,33)
 const item34balance= await itemsFacet.balanceOfToken(diamondAddress,gotchi1,34)
@@ -261,7 +261,7 @@ expect(item34balance.toString()).to.equal('1')
 //make sure they are reduced
 expect(Citem33balance.toString()).to.equal('6')
 expect(Citem34balance.toString()).to.equal('4')
-//const details1=await airdropContract.checkGotchiAirdropDetails(1)
+//const details1=await airdropContract.getGotchiAirdrop(1)
 //const details2=await airdropContract.checkAddressAirdropDetails(0)
 //console.log(details1)
 //console.log(details2)
