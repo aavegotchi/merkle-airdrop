@@ -108,7 +108,7 @@ it('should deploy merkle contract and add the first address airdrop correctly',a
 	  });
 
 const airdrop= await(await ethers.getContractFactory("MerkleDistributor")).connect(minterSign);
-airdropContract=await airdrop.deploy();
+airdropContract=await airdrop.deploy("0x86935F11C86623deC8a25696E1C19a8659CbF95d");
 airdropAdd=airdropContract.address
 //console.log('airdrop contract deployed to:',airdropAdd)
 await airdropContract.addAddressAirdrop('For Stani fans',currentRoot1,diamondAddress,10,itemsToMint)
