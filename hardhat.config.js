@@ -24,7 +24,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.MATIC_URL,
+        url: 'https://polygon-mainnet.infura.io/v3/808f937e053a4c9686997a0d7430aa08',
+        blockNumber: 16712208,
         timeout: 120000
       }
     },
@@ -77,26 +78,12 @@ module.exports = {
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
-    compilers: [
-      {
-        version: '0.8.1',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200
-          }
-        }
+    version: "0.8.1",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
       },
-      {
-        version: '0.7.4',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200
-          }
-        }
-      }
-    ]
-
+    },
   }
 }
