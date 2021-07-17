@@ -63,7 +63,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
         return s.gotchiClaims[tokenId][_airdropID];
     }
 
-    function _setAddressClaimed(address _user, uint256 _airdropID) private {
+    function setAddressClaimed(address _user, uint256 _airdropID) private {
         s.addressClaims[_user][_airdropID] = true;
     }
 
@@ -83,7 +83,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
         return gStat;
     }
 
-    function _setGotchiClaimed(uint256 _tokenId, uint256 _airdropID) private {
+    function setGotchiClaimed(uint256 _tokenId, uint256 _airdropID) private {
         s.gotchiClaims[_tokenId][_airdropID] = true;
     }
 
@@ -106,7 +106,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
         require(MerkleProof.verify(merkleProof, merkleRoot, node), "MerkleDistributor: Invalid proof.");
 
         // Mark it claimed and send the token.
-        _setAddressClaimed(_account, _airdropId);
+        setAddressClaimed(_account, _airdropId);
         IERC1155(token).safeTransferFrom(address(this), _account, _itemId, _amount, data);
         drop.claims++;
         //only emit when successful
@@ -127,10 +127,10 @@ contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
         uint256[] calldata tokenIds,
         uint256[] calldata _itemIds,
         uint256[] calldata _amounts,
-        bytes32[][] calldata merkleProof
+        bytes32[][] calldata merkleProofs
     ) external {
         require(
-            tokenIds.length == _itemIds.length && _itemIds.length == _amounts.length && merkleProof.length == _itemIds.length,
+            tokenIds.length == _itemIds.length && _itemIds.length == _amounts.length && merkleProofs.length == _itemIds.length,
             "GotchiClaim: mismatched number of array elements"
         );
         if (_airdropId > s.airdropCounter) {
@@ -140,17 +140,15 @@ contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
         bytes32 merkleRoot = drop.merkleRoot;
         address itemContract = drop.tokenAddress;
         for (uint256 index; index < tokenIds.length; index++) {
-            //using a temporary struct to avoid stack too deep errors
-            // uint256[] storage ineligibleGotchis;
             GotchiClaimDetails memory g;
             g.tokenId = tokenIds[index];
             g.amount = _amounts[index];
             g.itemId = _itemIds[index];
             g.tokenContract = itemContract;
-            g.proof = merkleProof[index];
+            g.proof = merkleProofs[index];
             g._node = keccak256(abi.encodePacked(g.tokenId, g.itemId, g.amount));
             if ((MerkleProof.verify(g.proof, merkleRoot, g._node)) && !(isGotchiClaimed(_airdropId, tokenIds[index]))) {
-                _setGotchiClaimed(g.tokenId, _airdropId);
+                setGotchiClaimed(g.tokenId, _airdropId);
                 ItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.receivingContract, g.tokenId, g.itemId, g.amount);
                 drop.claims++;
                 emit GotchiClaim(_airdropId, tokenIds[index], _itemIds[index], _amounts[index]);
