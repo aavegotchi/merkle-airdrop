@@ -1,11 +1,13 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 const truffleAsserts = require('truffle-assertions')
-//const {allOps} = require('../scripts/generate_merkle_tree.js');
+const {deployDiamond} = require('../scripts/deployAirdropDiamond.js');
 
 describe('Test merkle', async function () {
   this.timeout(300000000)
+ 
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+  let merkleDiamond
   const minter= '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
   let minterSign=await ethers.getSigner(minter)
 
@@ -87,6 +89,9 @@ airdropContract1,
 airdropContract2
 
 before(async function () {
+
+	//deploy airdrop diamond
+	merkleDiamond=await deployDiamond();
 	this.timeout(300000)
 gotchiFacet= await ethers.getContractAt('AavegotchiFacet',diamondAddress)
 daoFacet= await ethers.getContractAt('DAOFacet',diamondAddress)
@@ -97,20 +102,21 @@ owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).own
 })
 
 
-describe('deploy airdrop contract ', async function(){
+describe('Interact with airdrop facet ', async function(){
 	this.timeout(3000000)
+	console.log()
 
-it('should deploy merkle contract and add the first address airdrop correctly',async function(){
+it('should add the first address airdrop correctly',async function(){
 
 	await hre.network.provider.request({
 		method: "hardhat_impersonateAccount",
 		params: [minter]
 	  });
 
-const airdrop= await(await ethers.getContractFactory("MerkleDistributor")).connect(minterSign);
-airdropContract=await airdrop.deploy("0x86935F11C86623deC8a25696E1C19a8659CbF95d");
+airdropContract= await(await ethers.getContractAt("MerkleAirdropFacet",merkleDiamond));
+//airdropContract=await airdrop.deploy("0x86935F11C86623deC8a25696E1C19a8659CbF95d");
 airdropAdd=airdropContract.address
-//console.log('airdrop contract deployed to:',airdropAdd)
+console.log('airdrop contract deployed to:',airdropAdd)
 await airdropContract.addAddressAirdrop('For Stani fans',currentRoot1,diamondAddress,10,itemsToMint)
 const details=await airdropContract.checkAddressAirdropDetails(0)
 //console.log('address airdrop details',details)

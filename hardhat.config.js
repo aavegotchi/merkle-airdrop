@@ -2,7 +2,7 @@
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-ethers')
 require('hardhat-contract-sizer')
-require('dotenv').config()
+require('dotenv-safe').config()
 require('solidity-coverage')
 //require('./tasks/generateDiamondABI.js')
 
@@ -24,7 +24,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: 'https://polygon-mainnet.infura.io/v3/808f937e053a4c9686997a0d7430aa08',
+        url: process.env.MATIC_URL,
         blockNumber: 16712208,
         timeout: 120000
       }
