@@ -156,11 +156,11 @@ contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
         }
     }
 
-    function checkAddressAirdropDetails(uint256 _airdropID) public view returns (AddressAirdrop memory) {
+    function getAddressAirdropDetails(uint256 _airdropID) public view returns (AddressAirdrop memory) {
         return s.addressAirdrops[_airdropID];
     }
 
-    function checkGotchiAirdropDetails(uint256 _airdropID) public view returns (GotchiAirdrop memory) {
+    function getGotchiAirdropDetails(uint256 _airdropID) public view returns (GotchiAirdrop memory) {
         return s.gotchiAirdrops[_airdropID];
     }
 

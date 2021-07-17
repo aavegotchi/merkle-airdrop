@@ -114,7 +114,7 @@ describe("Test merkle", async function () {
         10,
         itemsToMint
       );
-      const details = await airdropContract.checkAddressAirdropDetails(0);
+      const details = await airdropContract.getAddressAirdropDetails(0);
       //console.log('address airdrop details',details)
       expect(details.name).to.equal("For Stani fans");
       expect(details.airdropID.toString()).to.equal("0");
@@ -134,7 +134,7 @@ describe("Test merkle", async function () {
       );
       const gotchiEv = await airdropContract.areGotchisClaimed([3410, 6845], 1);
       console.log(gotchiEv);
-      const details = await airdropContract.checkGotchiAirdropDetails(1);
+      const details = await airdropContract.getGotchiAirdropDetails(1);
       expect(gotchiEv[0]).to.equal(true);
       expect(gotchiEv[1]).to.equal(true);
       expect(details.name).to.equal("For Stani Fans");
@@ -260,7 +260,7 @@ describe("Test merkle", async function () {
         [gotchi1Object.amountToClaim, gotchi2Object.amountToClaim],
         [gotchi1Object.proof, gotchi2Object.proof]
       );
-      const details = await airdropContract.checkGotchiAirdropDetails(1);
+      const details = await airdropContract.getGotchiAirdropDetails(1);
       //console.log(deets.events)
       //console.log(details)
       const item33balance = await itemsFacet.balanceOfToken(
@@ -292,7 +292,7 @@ describe("Test merkle", async function () {
         [gotchi1Object.amountToClaim, gotchi2Object.amountToClaim],
         [gotchi1Object.proof, gotchi2Object.proof]
       );
-      //	const details=await airdropContract.checkGotchiAirdropDetails(1)
+      //	const details=await airdropContract.getGotchiAirdropDetails(1)
       //	await truffleAsserts.reverts(airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof]),"MerkleDistributor: Drop already claimed or gotchi not included.")
       const item33balance = await itemsFacet.balanceOfToken(
         diamondAddress,
@@ -320,8 +320,8 @@ describe("Test merkle", async function () {
       //make sure they are reduced
       expect(Citem33balance.toString()).to.equal("6");
       expect(Citem34balance.toString()).to.equal("4");
-      //const details1=await airdropContract.checkGotchiAirdropDetails(1)
-      //const details2=await airdropContract.checkAddressAirdropDetails(0)
+      //const details1=await airdropContract.getGotchiAirdropDetails(1)
+      //const details2=await airdropContract.getAddressAirdropDetails(0)
       //console.log(details1)
       //console.log(details2)
     });
