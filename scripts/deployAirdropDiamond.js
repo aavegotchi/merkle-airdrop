@@ -5,7 +5,7 @@ async function deployDiamond() {
   const accounts = await ethers.getSigners();
 
   const contractOwner = accounts[0];
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  const aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   console.log("Diamond owner is", contractOwner.address);
 
   // deploy DiamondCutFacet
@@ -19,7 +19,7 @@ async function deployDiamond() {
   const diamond = await Diamond.deploy(
     contractOwner.address,
     diamondCutFacet.address,
-    diamondAddress
+    aavegotchiDiamondAddress
   );
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
