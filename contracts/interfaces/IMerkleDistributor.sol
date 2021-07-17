@@ -1,18 +1,69 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.5.0;
+pragma solidity 0.8.1;
 
-// Allows anyone to claim a token if they exist in a merkle root.
+// Allows anyone/any gotchi to claim a token if they exist in a merkle root.
 interface IMerkleDistributor {
-    // Returns the address of the token distributed by this contract.
-    function tokenAddress() external view returns (address);
-    // Returns the merkle root of the merkle tree containing account balances available to claim.
-    function merkleRoot() external view returns (bytes32);
-    // Returns true if the index has been marked claimed.
-    function isClaimed(address _user,uint256 _airdropID) external view returns (bool);
-    // Claim the given amount of the token to the given address. Reverts if the inputs are invalid.
-    function claim( address _account,uint256 _itemId ,uint256 _amount, bytes32[] calldata merkleProof,bytes calldata data) external;
-    //admin only,allows the addition of new airdrops
-    function addAirdrop(string memory airdropName,bytes32 _merkleRoot,address _tokenAddress,uint256 MAX,uint256[] calldata _tokenIDs) external returns(string memory,address);
-    // This event is triggered whenever a call to #claim succeeds.
-    event Claimed(uint256 airdropID,address account, uint256 itemId,uint256 amount);
+    struct AddressAirdrop {
+        string name;
+        uint256 airdropID;
+        bytes32 merkleRoot;
+        uint256 maxUsers;
+        uint256[] itemIDs;
+        uint256 claims;
+        address tokenAddress;
+    }
+
+    struct GotchiAirdrop {
+        string name;
+        uint256 airdropID;
+        bytes32 merkleRoot;
+        address tokenAddress;
+        uint256 maxGotchis;
+        uint256[] itemIDs;
+        uint256 claims;
+    }
+
+    function addAddressAirdrop(
+        string memory _airdropName,
+        bytes32 _merkleRoot,
+        address _tokenAddress,
+        uint256 _max,
+        uint256[] calldata _itemIDs
+    ) external returns (string memory, address);
+
+    function addGotchiAirdrop(
+        string memory _airdropName,
+        bytes32 _merkleRoot,
+        address _tokenAddress,
+        uint256 _max,
+        uint256[] calldata _itemIDs
+    ) external returns (string memory, address);
+
+    function isAddressClaimed(address _user, uint256 _airdropID) external view returns (bool);
+
+    function isGotchiClaimed(uint256 _airdropID, uint256 tokenId) external view returns (bool);
+
+    function areGotchisClaimed(uint256[] memory _gotchiIds, uint256 _airdropID) external view returns (bool[] memory);
+
+    function claimForAddress(
+        uint256 _airdropId,
+        address _account,
+        uint256 _itemId,
+        uint256 _amount,
+        bytes32[] calldata merkleProof,
+        bytes calldata data
+    ) external returns (address, uint256);
+
+    function claimForGotchis(
+        uint256 _airdropId,
+        uint256[] calldata tokenIds,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _amounts,
+        bytes32[][] calldata merkleProof
+    ) external;
+
+    function checkAddressAirdropDetails(uint256 _airdropID) external view returns (AddressAirdrop memory);
+
+    function checkGotchiAirdropDetails(uint256 _airdropID) external view returns (GotchiAirdrop memory);
+
+    function setRecevingContract(address _recevingContract) external;
 }

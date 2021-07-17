@@ -31,7 +31,8 @@ console.log('')
 console.log('Deploying facets')
 const FacetNames = [
   'DiamondLoupeFacet',
-  'MerkleAirdropFacet'
+  'MerkleAirdropFacet',
+  'OwnershipFacet'
 ]
 
 const cut=[]

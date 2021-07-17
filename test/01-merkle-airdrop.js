@@ -133,8 +133,8 @@ await airdropContract.addGotchiAirdrop('For Stani Fans',currentRoot2,diamondAddr
 const gotchiEv=await airdropContract.areGotchisClaimed([3410,6845],1)
 console.log(gotchiEv)
 const details=await airdropContract.checkGotchiAirdropDetails(1)
-expect(gotchiEv[0]).to.equal(true)
-expect(gotchiEv[1]).to.equal(true)
+expect(gotchiEv[0]).to.equal(false)
+expect(gotchiEv[1]).to.equal(false)
 expect(details.name).to.equal('For Stani Fans')
 expect((details.airdropID).toString()).to.equal('1')
 expect(details.merkleRoot).to.equal(currentRoot2)
@@ -190,7 +190,7 @@ let rec1sign=await ethers.getSigner(recipient1)
 let rec2sign=await ethers.getSigner(recipient2) 
 airdropContract1=await airdropContract.connect(rec1sign)
 airdropContract2=await airdropContract.connect(rec2sign)
-await airdropContract1.claimForAddress(0,recipient1,recipient1Object.itemId,recipient1Object.amountToClaim,recipient1Object.proof,"0x00")
+await airdropContract1.claimForAddress(0,recipient1Object.itemId,recipient1Object.amountToClaim,recipient1Object.proof,"0x00")
 await hre.network.provider.request({
 	method: "hardhat_stopImpersonatingAccount",
 	params: [recipient1]
@@ -199,7 +199,7 @@ await hre.network.provider.request({
 	method: "hardhat_impersonateAccount",
 	params: [recipient2]
   });
-  await airdropContract2.claimForAddress(0,recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00")
+  await airdropContract2.claimForAddress(0,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00")
 const item33balance= await itemsFacet.balanceOf(recipient1,33)
 const item34balance= await itemsFacet.balanceOf(recipient2,34)
 //contract balances
@@ -215,7 +215,7 @@ const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
 })
 
 it('should revert while an address tries to claim more than once',async function(){
-await truffleAsserts.reverts(airdropContract2.claimForAddress(0,recipient2,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00"),'MerkleDistributor: Drop already claimed or address not included.');
+await truffleAsserts.reverts(airdropContract2.claimForAddress(0,recipient2Object.itemId,recipient2Object.amountToClaim,recipient2Object.proof,"0x00"),'MerkleDistributor: Drop already claimed or address not included.');
 
 })
 
@@ -248,7 +248,7 @@ const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)
 
 })
 
-it('balance should remain unchanged without reverting if gotchi(s) has been claimed before',async function(){
+it('balance should remain unchanged without reverting if gotchi(s) have claimed before',async function(){
 	const returns=await airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof])
 //	const details=await airdropContract.checkGotchiAirdropDetails(1)
 //	await truffleAsserts.reverts(airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof]),"MerkleDistributor: Drop already claimed or gotchi not included.")
@@ -256,8 +256,8 @@ it('balance should remain unchanged without reverting if gotchi(s) has been clai
 const item34balance= await itemsFacet.balanceOfToken(diamondAddress,gotchi1,34)
 
 const itemEv=await airdropContract.areGotchisClaimed([gotchi1,gotchi2],1)
-expect(itemEv[0]).to.equal(false);
-expect(itemEv[1]).to.equal(false);
+expect(itemEv[0]).to.equal(true);
+expect(itemEv[1]).to.equal(true);
 //contract balances
 const Citem33balance= await itemsFacet.balanceOf(airdropAdd,33)
 const Citem34balance= await itemsFacet.balanceOf(airdropAdd,34)

@@ -26,11 +26,11 @@ module.exports = {
       forking: {
         url: process.env.MATIC_URL,
         blockNumber: 16712208,
-        timeout: 120000
+        timeout: 1200000
       }
     },
     localhost: {
-      timeout: 160000
+      timeout: 1600000
     },
      
     // matic: {
@@ -57,7 +57,8 @@ module.exports = {
     kovan: {
        url: process.env.KOVAN_URL,
        accounts: [process.env.SECRET],
-       gasPrice: 5000000000
+       gasPrice: 5000000000,
+       timeout: 200000000
     },
     // ethereum: {
     //   url: process.env.MAINNET_URL,
