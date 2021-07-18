@@ -81,7 +81,7 @@ describe("Test merkle", async function () {
   before(async function () {
     this.timeout(3000000);
     //deploy airdrop diamond
-    merkleDiamond = "0x3b55EA0603381BdAF59ADd83A5bcBD9C3ae1d7C8";
+    merkleDiamond = await deployDiamond();
 
     gotchiFacet = await ethers.getContractAt("AavegotchiFacet", diamondAddress);
     daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress);
@@ -107,7 +107,6 @@ describe("Test merkle", async function () {
       //airdropContract=await airdrop.deploy("0x86935F11C86623deC8a25696E1C19a8659CbF95d");
       airdropAdd = airdropContract.address;
       console.log("airdrop contract deployed to:", airdropAdd);
-      console.log("hi");
       await airdropContract.addAddressAirdrop(
         "For Stani fans",
         currentRoot1,
