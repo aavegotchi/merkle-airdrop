@@ -3,9 +3,8 @@ const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
 async function deployDiamond() {
   const accounts = await ethers.getSigners();
-
   const contractOwner = accounts[0];
-  const aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   console.log("Diamond owner is", contractOwner.address);
 
   // deploy DiamondCutFacet
@@ -15,11 +14,11 @@ async function deployDiamond() {
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
   // deploy Diamond
-  const Diamond = await ethers.getContractFactory("Diamond");
+  const Diamond = await ethers.getContractFactory("MerkleDiamond");
   const diamond = await Diamond.deploy(
     contractOwner.address,
     diamondCutFacet.address,
-    aavegotchiDiamondAddress
+    diamondAddress
   );
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
@@ -38,11 +37,6 @@ async function deployDiamond() {
     "MerkleAirdropFacet",
     "OwnershipFacet",
   ];
-
-  // deploy facets
-  console.log("");
-  console.log("Deploying facets");
-  const FacetNames = ["DiamondLoupeFacet", "MerkleAirdropFacet"];
 
   const cut = [];
 

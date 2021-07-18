@@ -12,7 +12,7 @@ import {LibDiamond} from "./libraries/LibDiamond.sol";
 import {IDiamondCut} from "./interfaces/IDiamondCut.sol";
 import {AppStorage} from "./libraries/LibAppStorage.sol";
 
-contract Diamond {
+contract MerkleDiamond {
     AppStorage internal s;
 
     constructor(
