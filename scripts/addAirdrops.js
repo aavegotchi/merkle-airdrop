@@ -44,7 +44,7 @@ async function AddAirdrops() {
 async function claim() {
   const accounts = await ethers.getSigners();
   const contractOwner = accounts[0];
-  console.log("Adding with the account", contractOwner.address);
+  console.log("claiming with the account", contractOwner.address);
 
   const proof = [
     "0x10ff2fe309d43253981a4391bbed37b31b0e49de4f724a9eaef0d6e89dbbd095",
