@@ -8,7 +8,7 @@ import "../interfaces/IItemsTransferFacet.sol";
 import "../libraries/LibAppStorage.sol";
 import "../shared/ERC1155TokenReceiver.sol";
 
-contract MerkleAirdropFacet is Modifiers,IERC1155TokenReceiver {
+contract MerkleAirdropFacet is Modifiers,ERC1155TokenReceiver {
     event AddressAirdropCreated(string name, uint256 id, address tokenAddress);
     event GotchiAirdropCreated(string name, uint256 id, address tokenAddress);
     event AddressClaim(uint256 airdropID, address account, uint256 itemId, uint256 amount);
