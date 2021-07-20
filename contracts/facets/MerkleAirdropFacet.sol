@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "../interfaces/IMerkleDistributor.sol";
 import "../interfaces/IItemsTransferFacet.sol";
 import "../libraries/LibAppStorage.sol";
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import "../shared/ERC1155TokenReceiver.sol";
 
-contract MerkleAirdropFacet is Modifiers, ERC1155Holder {
+contract MerkleAirdropFacet is Modifiers,IERC1155TokenReceiver {
     event AddressAirdropCreated(string name, uint256 id, address tokenAddress);
     event GotchiAirdropCreated(string name, uint256 id, address tokenAddress);
     event AddressClaim(uint256 airdropID, address account, uint256 itemId, uint256 amount);
