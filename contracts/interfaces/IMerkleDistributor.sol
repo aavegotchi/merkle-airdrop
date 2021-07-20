@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 // Allows anyone/any gotchi to claim a token if they exist in a merkle root.
