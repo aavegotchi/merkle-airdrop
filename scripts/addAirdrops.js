@@ -5,7 +5,7 @@
 
 async function AddAirdrops() {
   const AddressDropRoot =
-    "0xe81b116d1a2dc5d823dcaee0b9fabf195dc1ac51680038003c60bf66984115c9";
+    "0xbb2333c9ec71cbbcd15ec57fafdfb20397310baa340493f5dc815e967f0ebe7a";
 
   // const GotchiDropRoots =
   //  "0x5c21f52c93fd5b0dd56e8a3a4ef57f42afae71dad9b03b34ac51d0c345d80b0a";
@@ -14,14 +14,14 @@ async function AddAirdrops() {
   const accounts = await ethers.getSigners();
 
   const contractOwner = accounts[0];
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d"; //polygon mainnet
+  const diamondAddress = "0x07543dB60F19b9B48A69a7435B5648b46d4Bb58E"; //polygon mainnet
   console.log("Adding with the account", contractOwner.address);
 
   //deploy the merkleDiamond
   //const airdropDiamond = await deployDiamond();
   const dropContract = await ethers.getContractAt(
     "MerkleAirdropFacet",
-    "Merkle airdrop Diamond address here"
+    "0x3E3a9ded23d00375ef4820ca78ce66232f7781E5"
   );
 
   //add first address airdrop
@@ -29,7 +29,7 @@ async function AddAirdrops() {
     "Birthday Party Tickets", //airdrop name
     AddressDropRoot, //merkle root
     diamondAddress,
-    1128, //total no of people
+    1129, //total no of people
     addressItems //items to be claimed
   );
   /** 

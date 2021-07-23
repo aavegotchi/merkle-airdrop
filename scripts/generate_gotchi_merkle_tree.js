@@ -58,8 +58,10 @@ function main() {
     full_gotchi_claim = {};
 
     let dropObjs = {
-      contractAddress: airdropContract,
-      merkleroot: root,
+      dropDetails: {
+        contractAddress: airdropContract,
+        merkleroot: root,
+      },
     };
 
     for (line = 0; line < gotchi_dist_list.length; line++) {
@@ -92,24 +94,15 @@ function main() {
         };
         full_gotchi_claim[gotchi_dist_list[line][0]] = gotchi_claim;
       }
+      let newObj = Object.assign(full_gotchi_claim, dropObjs);
       //append to airdrop list to have comprehensive overview
-      fs.writeFile(
-        userclaimFile,
-        JSON.stringify(full_gotchi_claim, null, 4),
-        (err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-        }
-      );
-
-      fs.appendFile(userclaimFile, JSON.stringify(dropObjs, null, 4), (err) => {
+      fs.writeFile(userclaimFile, JSON.stringify(newObj, null, 4), (err) => {
         if (err) {
           console.error(err);
           return;
         }
       });
+
       console.log(output_file, "has been written with a root hash of:\n", root);
     });
 

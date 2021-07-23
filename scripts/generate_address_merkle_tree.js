@@ -77,8 +77,10 @@ function main() {
       }
 
       let dropObjs = {
-        contractAddress: airdropContract,
-        merkleroot: root,
+        dropDetails: {
+          contractAddress: airdropContract,
+          merkleroot: root,
+        },
       };
 
       for (line = 0; line < user_dist_list.length; line++) {
@@ -91,20 +93,9 @@ function main() {
         };
         full_user_claim[user_dist_list[line][0]] = user_claim;
       }
-
+      let newObj = Object.assign(full_user_claim, dropObjs);
       //append to airdrop list to have comprehensive overview
-      fs.writeFile(
-        userclaimFile,
-        JSON.stringify(full_user_claim, null, 4),
-        (err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-        }
-      );
-
-      fs.appendFile(userclaimFile, JSON.stringify(dropObjs, null, 4), (err) => {
+      fs.writeFile(userclaimFile, JSON.stringify(newObj, null, 4), (err) => {
         if (err) {
           console.error(err);
           return;

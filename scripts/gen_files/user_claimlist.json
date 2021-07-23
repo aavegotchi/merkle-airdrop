@@ -5638,8 +5638,14 @@
         "address": "0xfFea5a2cfAF1AaFbB87A1FE4eED5413DA45C30a0",
         "itemID": "0",
         "amount": "1"
+    },
+    "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5": {
+        "address": "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5",
+        "itemID": "2",
+        "amount": "1"
+    },
+    "dropDetails": {
+        "contractAddress": "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c",
+        "merkleroot": "0xbb2333c9ec71cbbcd15ec57fafdfb20397310baa340493f5dc815e967f0ebe7a"
     }
-}{
-    "contractAddress": "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c",
-    "merkleroot": "0xe81b116d1a2dc5d823dcaee0b9fabf195dc1ac51680038003c60bf66984115c9"
 }
