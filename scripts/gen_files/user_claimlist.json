@@ -5639,4 +5639,7 @@
         "itemID": "0",
         "amount": "1"
     }
+}{
+    "contractAddress": "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c",
+    "merkleroot": "0xe81b116d1a2dc5d823dcaee0b9fabf195dc1ac51680038003c60bf66984115c9"
 }

@@ -24,4 +24,7 @@
         "itemID": "33",
         "amount": "1"
     }
+}{
+    "contractAddress": "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c",
+    "merkleroot": "0x5c21f52c93fd5b0dd56e8a3a4ef57f42afae71dad9b03b34ac51d0c345d80b0a"
 }

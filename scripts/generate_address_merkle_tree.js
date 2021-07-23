@@ -9,6 +9,8 @@ function main() {
   // create web3 instance (no provider needed)
   var web3 = new Web3();
   let root;
+
+  ///files for each ardrop
   // import distribution from this file
   const filename = "gen_files/address_sample_dist_list.csv";
 
@@ -17,6 +19,9 @@ function main() {
 
   //file that has the user claim list
   const userclaimFile = "gen_files/user_claimlist.json";
+
+  //contract of items being sent out
+  const airdropContract = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
 
   // used to store one leaf for each line in the distribution file
   const token_dist = [];
@@ -71,6 +76,11 @@ function main() {
         return;
       }
 
+      let dropObjs = {
+        contractAddress: airdropContract,
+        merkleroot: root,
+      };
+
       for (line = 0; line < user_dist_list.length; line++) {
         const other = user_dist_list[line];
         // console.log(gotchi_dist_list[line])
@@ -81,6 +91,7 @@ function main() {
         };
         full_user_claim[user_dist_list[line][0]] = user_claim;
       }
+
       //append to airdrop list to have comprehensive overview
       fs.writeFile(
         userclaimFile,
@@ -92,6 +103,13 @@ function main() {
           }
         }
       );
+
+      fs.appendFile(userclaimFile, JSON.stringify(dropObjs, null, 4), (err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+      });
       console.log(output_file, "has been written with a root hash of:\n", root);
     });
 
