@@ -8,7 +8,7 @@ import "../interfaces/IItemsTransferFacet.sol";
 import "../libraries/LibAppStorage.sol";
 import "../shared/ERC1155TokenReceiver.sol";
 
-contract MerkleAirdropFacet is Modifiers,ERC1155TokenReceiver {
+contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
     event AddressAirdropCreated(string name, uint256 id, address tokenAddress);
     event GotchiAirdropCreated(string name, uint256 id, address tokenAddress);
     event AddressClaim(uint256 airdropID, address account, uint256 itemId, uint256 amount);
@@ -68,9 +68,7 @@ contract MerkleAirdropFacet is Modifiers,ERC1155TokenReceiver {
     }
 
     function areGotchisClaimed(uint256[] memory _gotchiIds, uint256 _airdropID) public view returns (bool[] memory) {
-        if (_airdropID > s.airdropCounter) {
-            revert("Airdrop is not created yet");
-        }
+        require(_airdropId < s.airdropCounter, "Airdrop is not created yet");
         bool[] memory gStat = new bool[](_gotchiIds.length);
         for (uint256 i; i < _gotchiIds.length; i++) {
             if (isGotchiClaimed(_airdropID, _gotchiIds[i])) {
