@@ -143,7 +143,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
             g.leaf = keccak256(abi.encodePacked(g.tokenId, g.itemId, g.amount));
             if ((MerkleProof.verify(g.proof, merkleRoot, g.leaf)) && !(isGotchiClaimed(_airdropId, tokenIds[index]))) {
                 setGotchiClaimed(g.tokenId, _airdropId);
-                IItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.receivingContract, g.tokenId, g.itemId, g.amount);
+                IItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.gotchiContract, g.tokenId, g.itemId, g.amount);
                 drop.claims++;
                 emit GotchiClaim(_airdropId, tokenIds[index], _itemIds[index], _amounts[index]);
             }
@@ -158,7 +158,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         return s.gotchiAirdrops[_airdropID];
     }
 
-    function setRecevingContract(address _recevingContract) public onlyOwner {
-        s.receivingContract = _recevingContract;
+    function setRecevingContract(address _gotchiContract) public onlyOwner {
+        s.gotchiContract = _gotchiContract;
     }
 }

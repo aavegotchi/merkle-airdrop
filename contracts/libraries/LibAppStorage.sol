@@ -29,7 +29,7 @@ struct AppStorage {
     mapping(address => mapping(uint256 => bool)) addressClaims;
     mapping(uint256 => mapping(uint256 => bool)) gotchiClaims;
     uint256 airdropCounter;
-    address receivingContract;
+    address gotchiContract;
 }
 
 library LibAppStorage {
