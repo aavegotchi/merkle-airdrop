@@ -14,21 +14,21 @@ async function AddAirdrops() {
   const accounts = await ethers.getSigners();
 
   const contractOwner = accounts[0];
-  const diamondAddress = "0x07543dB60F19b9B48A69a7435B5648b46d4Bb58E"; //polygon mainnet
+  const ticketContractAddress = "0xA4fF399Aa1BB21aBdd3FC689f46CCE0729d58DEd"; //polygon mainnet
   console.log("Adding with the account", contractOwner.address);
 
   //deploy the merkleDiamond
   //const airdropDiamond = await deployDiamond();
   const dropContract = await ethers.getContractAt(
     "MerkleAirdropFacet",
-    "0x3E3a9ded23d00375ef4820ca78ce66232f7781E5"
+    "0x36498F9Db33e1E38Ff09705b2E1863d0F917728f"
   );
 
   //add first address airdrop
   await dropContract.addAddressAirdrop(
     "Birthday Party Tickets", //airdrop name
     AddressDropRoot, //merkle root
-    diamondAddress,
+    ticketContractAddress,
     1129, //total no of people
     addressItems //items to be claimed
   );
