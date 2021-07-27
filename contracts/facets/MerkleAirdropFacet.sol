@@ -68,7 +68,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
     }
 
     function areGotchisClaimed(uint256[] memory _gotchiIds, uint256 _airdropID) public view returns (bool[] memory) {
-        require(_airdropId < s.airdropCounter, "Airdrop is not created yet");
+        require(_airdropID < s.airdropCounter, "Airdrop is not created yet");
         bool[] memory gStat = new bool[](_gotchiIds.length);
         for (uint256 i; i < _gotchiIds.length; i++) {
             if (isGotchiClaimed(_airdropID, _gotchiIds[i])) {
