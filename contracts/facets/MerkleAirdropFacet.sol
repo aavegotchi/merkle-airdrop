@@ -68,7 +68,10 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
     }
 
     function areGotchisClaimed(uint256[] memory _gotchiIds, uint256 _airdropID) public view returns (bool[] memory) {
-        require(_airdropID < s.airdropCounter, "Airdrop is not created yet");
+        GotchiAirdrop storage drop = s.gotchiAirdrops[_airdropID];
+
+        require(drop.maxGotchis > 0, "Airdrop is not created yet");
+        //}
         bool[] memory gStat = new bool[](_gotchiIds.length);
         for (uint256 i; i < _gotchiIds.length; i++) {
             if (isGotchiClaimed(_airdropID, _gotchiIds[i])) {
@@ -92,13 +95,13 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         bytes32[] calldata merkleProof,
         bytes calldata data
     ) external onlyUnclaimedAddress(msg.sender, _airdropId) {
-        require(_airdropId < s.airdropCounter, "Airdrop is not created yet");
         AddressAirdrop storage drop = s.addressAirdrops[_airdropId];
+        require(drop.maxUsers > 0, "Airdrop is not created yet");
         // Verify the merkle proof.
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, _itemId, _amount));
+        bytes32 node = keccak256(abi.encodePacked(msg.sender, _itemId, _amount));
         bytes32 merkleRoot = drop.merkleRoot;
         address token = drop.tokenAddress;
-        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "MerkleDistributor: Invalid proof.");
+        require(MerkleProof.verify(merkleProof, merkleRoot, node), "MerkleDistributor: Invalid proof.");
 
         // Mark it claimed and send the token.
         setAddressClaimed(msg.sender, _airdropId);
@@ -114,7 +117,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         uint256 itemId;
         address tokenContract;
         bytes32[] proof;
-        bytes32 leaf;
+        bytes32 _node;
     }
 
     function claimForGotchis(
@@ -128,9 +131,10 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
             tokenIds.length == _itemIds.length && _itemIds.length == _amounts.length && merkleProofs.length == _itemIds.length,
             "GotchiClaim: mismatched number of array elements"
         );
-        require(_airdropId < s.airdropCounter, "Airdrop is not created yet");
 
         GotchiAirdrop storage drop = s.gotchiAirdrops[_airdropId];
+        require(drop.maxGotchis > 0, "Airdrop is not created yet");
+
         bytes32 merkleRoot = drop.merkleRoot;
         address itemContract = drop.tokenAddress;
         for (uint256 index; index < tokenIds.length; index++) {
@@ -140,8 +144,8 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
             g.itemId = _itemIds[index];
             g.tokenContract = itemContract;
             g.proof = merkleProofs[index];
-            g.leaf = keccak256(abi.encodePacked(g.tokenId, g.itemId, g.amount));
-            if ((MerkleProof.verify(g.proof, merkleRoot, g.leaf)) && !(isGotchiClaimed(_airdropId, tokenIds[index]))) {
+            g._node = keccak256(abi.encodePacked(g.tokenId, g.itemId, g.amount));
+            if ((MerkleProof.verify(g.proof, merkleRoot, g._node)) && !(isGotchiClaimed(_airdropId, tokenIds[index]))) {
                 setGotchiClaimed(g.tokenId, _airdropId);
                 IItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.gotchiContract, g.tokenId, g.itemId, g.amount);
                 drop.claims++;
