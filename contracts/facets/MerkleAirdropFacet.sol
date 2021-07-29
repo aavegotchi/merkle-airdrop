@@ -92,8 +92,8 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         uint256 _airdropId,
         uint256 _itemId,
         uint256 _amount,
-        bytes32[] calldata merkleProof,
-        bytes calldata data
+        bytes32[] calldata _merkleProof,
+        bytes calldata _data
     ) external onlyUnclaimedAddress(msg.sender, _airdropId) {
         AddressAirdrop storage drop = s.addressAirdrops[_airdropId];
         require(drop.maxUsers > 0, "Airdrop is not created yet");
@@ -101,11 +101,11 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         bytes32 node = keccak256(abi.encodePacked(msg.sender, _itemId, _amount));
         bytes32 merkleRoot = drop.merkleRoot;
         address token = drop.tokenAddress;
-        require(MerkleProof.verify(merkleProof, merkleRoot, node), "MerkleDistributor: Invalid proof.");
+        require(MerkleProof.verify(_merkleProof, merkleRoot, node), "MerkleDistributor: Invalid proof.");
 
         // Mark it claimed and send the token.
         setAddressClaimed(msg.sender, _airdropId);
-        IERC1155(token).safeTransferFrom(address(this), msg.sender, _itemId, _amount, data);
+        IERC1155(token).safeTransferFrom(address(this), msg.sender, _itemId, _amount, _data);
         drop.claims++;
         //only emit when successful
         emit AddressClaim(_airdropId, msg.sender, _itemId, _amount);
@@ -122,13 +122,13 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
 
     function claimForTokens(
         uint256 _airdropId,
-        uint256[] calldata tokenIds,
+        uint256[] calldata _tokenIds,
         uint256[] calldata _itemIds,
         uint256[] calldata _amounts,
-        bytes32[][] calldata merkleProofs
+        bytes32[][] calldata _merkleProofs
     ) external {
         require(
-            tokenIds.length == _itemIds.length && _itemIds.length == _amounts.length && merkleProofs.length == _itemIds.length,
+            _tokenIds.length == _itemIds.length && _itemIds.length == _amounts.length && _merkleProofs.length == _itemIds.length,
             "TokenClaim: mismatched number of array elements"
         );
 
@@ -137,19 +137,19 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
 
         bytes32 merkleRoot = drop.merkleRoot;
         address itemContract = drop.tokenAddress;
-        for (uint256 index; index < tokenIds.length; index++) {
+        for (uint256 index; index < _tokenIds.length; index++) {
             TokenClaimDetails memory g;
-            g.tokenId = tokenIds[index];
+            g.tokenId = _tokenIds[index];
             g.amount = _amounts[index];
             g.itemId = _itemIds[index];
             g.tokenContract = itemContract;
-            g.proof = merkleProofs[index];
+            g.proof = _merkleProofs[index];
             g._node = keccak256(abi.encodePacked(g.tokenId, g.itemId, g.amount));
-            if ((MerkleProof.verify(g.proof, merkleRoot, g._node)) && !(isTokenClaimed(_airdropId, tokenIds[index]))) {
+            if ((MerkleProof.verify(g.proof, merkleRoot, g._node)) && !(isTokenClaimed(_airdropId, _tokenIds[index]))) {
                 setTokenClaimed(g.tokenId, _airdropId);
                 IItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.tokenContract, g.tokenId, g.itemId, g.amount);
                 drop.claims++;
-                emit TokenClaim(_airdropId, tokenIds[index], _itemIds[index], _amounts[index]);
+                emit TokenClaim(_airdropId, _tokenIds[index], _itemIds[index], _amounts[index]);
             }
         }
     }
