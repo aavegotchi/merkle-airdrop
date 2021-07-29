@@ -18,10 +18,10 @@ contract MerkleDiamond {
     constructor(
         address _contractOwner,
         address _diamondCutFacet,
-        address _gotchiContract
+        address _tokenContract
     ) payable {
         LibDiamond.setContractOwner(_contractOwner);
-        s.gotchiContract = _gotchiContract;
+        s.tokenContract = _tokenContract;
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
         bytes4[] memory functionSelectors = new bytes4[](1);

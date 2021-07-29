@@ -40,7 +40,7 @@ describe("Test merkle", async function () {
     amountToClaim: 5,
   };
 
-  let gotchi2Object = {
+  let token2Object = {
     leaf: "0x40b6ce247f661d439f088e812daa742343795754fcbee00a0b80de24025e1017",
     proof: [
       "0x26d6bd4433a63cfd93023a38133b1d90759d06d6e1ce85e368fb70f0780ababe",
@@ -50,7 +50,7 @@ describe("Test merkle", async function () {
     amountToClaim: 1,
   };
 
-  let gotchi1Object = {
+  let token1Object = {
     leaf: "0x26d6bd4433a63cfd93023a38133b1d90759d06d6e1ce85e368fb70f0780ababe",
     proof: [
       "0x40b6ce247f661d439f088e812daa742343795754fcbee00a0b80de24025e1017",
@@ -62,15 +62,15 @@ describe("Test merkle", async function () {
 
   let recipient1 = "0x15290cd9955154de5d18E0Cc1ef375bb7f9F2e26";
   let recipient2 = "0x805b01E7F3Fe127769B249763250222630968b4d";
-  let gotchi1 = 3410;
-  let gotchi2 = 6845;
+  let token1 = 3410;
+  let token2 = 6845;
   let itemsToMint = [33, 34]; //Stani hair,Stani vest
   let amount = [10, 10];
   //current root
 
   let airdropContract,
     recipient,
-    gotchiFacet,
+    tokenFacet,
     daoFacet,
     itemsFacet,
     airdropAdd,
@@ -83,7 +83,7 @@ describe("Test merkle", async function () {
     //deploy airdrop diamond
     merkleDiamond = await deployDiamond();
 
-    gotchiFacet = await ethers.getContractAt("AavegotchiFacet", diamondAddress);
+    tokenFacet = await ethers.getContractAt("AavegotchiFacet", diamondAddress);
     daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress);
     itemsFacet = await ethers.getContractAt("ItemsFacet", diamondAddress);
     owner = await (
@@ -124,24 +124,24 @@ describe("Test merkle", async function () {
       expect(details.itemIDs.toString()).to.equal(itemsToMint.toString());
     });
 
-    it("should add the first gotchi airdrop correctly and return that the gotchis have not claimed", async function () {
-      await airdropContract.addGotchiAirdrop(
+    it("should add the first token airdrop correctly and return that the tokens have not claimed", async function () {
+      await airdropContract.addTokenAirdrop(
         "For Stani Fans",
         currentRoot2,
         diamondAddress,
         7,
         itemsToMint
       );
-      const gotchiEv = await airdropContract.areGotchisClaimed([3410, 6845], 1);
-      console.log(gotchiEv);
-      const details = await airdropContract.getGotchiAirdropDetails(1);
-      expect(gotchiEv[0]).to.equal(false);
-      expect(gotchiEv[1]).to.equal(false);
+      const tokenEv = await airdropContract.areTokensClaimed([3410, 6845], 1);
+      console.log(tokenEv);
+      const details = await airdropContract.getTokenAirdropDetails(1);
+      expect(tokenEv[0]).to.equal(false);
+      expect(tokenEv[1]).to.equal(false);
       expect(details.name).to.equal("For Stani Fans");
       expect(details.airdropID.toString()).to.equal("1");
       expect(details.merkleRoot).to.equal(currentRoot2);
       expect(details.tokenAddress).to.equal(diamondAddress);
-      expect(details.maxGotchis.toString()).to.equal("7");
+      expect(details.maxTokens.toString()).to.equal("7");
       expect(details.itemIDs.toString()).to.equal(itemsToMint.toString());
       await hre.network.provider.request({
         method: "hardhat_stopImpersonatingAccount",
@@ -239,7 +239,7 @@ describe("Test merkle", async function () {
       );
     });
 
-    it("should allow any address to claim wearables for eligible gotchis", async function () {
+    it("should allow any address to claim wearables for eligible tokens", async function () {
       await hre.network.provider.request({
         method: "hardhat_stopImpersonatingAccount",
         params: [recipient2],
@@ -250,24 +250,24 @@ describe("Test merkle", async function () {
       });
       let rec1sign = await ethers.getSigner(recipient1);
       airdropContract1 = await airdropContract.connect(rec1sign);
-      const claimFor = await airdropContract1.claimForGotchis(
+      const claimFor = await airdropContract1.claimForTokens(
         1,
-        [gotchi1, gotchi2],
-        [gotchi1Object.itemId, gotchi2Object.itemId],
-        [gotchi1Object.amountToClaim, gotchi2Object.amountToClaim],
-        [gotchi1Object.proof, gotchi2Object.proof]
+        [token1, token2],
+        [token1Object.itemId, token2Object.itemId],
+        [token1Object.amountToClaim, token2Object.amountToClaim],
+        [token1Object.proof, token2Object.proof]
       );
-      const details = await airdropContract.getGotchiAirdropDetails(1);
+      const details = await airdropContract.getTokenAirdropDetails(1);
       //console.log(deets.events)
       //console.log(details)
       const item33balance = await itemsFacet.balanceOfToken(
         diamondAddress,
-        gotchi2,
+        token2,
         33
       );
       const item34balance = await itemsFacet.balanceOfToken(
         diamondAddress,
-        gotchi1,
+        token1,
         34
       );
       //contract balances
@@ -281,29 +281,29 @@ describe("Test merkle", async function () {
       expect(Citem34balance.toString()).to.equal("4");
     });
 
-    it("balance should remain unchanged without reverting if gotchi(s) have claimed before", async function () {
-      const returns = await airdropContract1.claimForGotchis(
+    it("balance should remain unchanged without reverting if token(s) have claimed before", async function () {
+      const returns = await airdropContract1.claimForTokens(
         1,
-        [gotchi1, gotchi2],
-        [gotchi1Object.itemId, gotchi2Object.itemId],
-        [gotchi1Object.amountToClaim, gotchi2Object.amountToClaim],
-        [gotchi1Object.proof, gotchi2Object.proof]
+        [token1, token2],
+        [token1Object.itemId, token2Object.itemId],
+        [token1Object.amountToClaim, token2Object.amountToClaim],
+        [token1Object.proof, token2Object.proof]
       );
-      //	const details=await airdropContract.checkGotchiAirdropDetails(1)
-      //	await truffleAsserts.reverts(airdropContract1.claimForGotchis(1,[gotchi1,gotchi2],[gotchi1Object.itemId,gotchi2Object.itemId],[gotchi1Object.amountToClaim,gotchi2Object.amountToClaim],[gotchi1Object.proof,gotchi2Object.proof]),"MerkleDistributor: Drop already claimed or gotchi not included.")
+      //	const details=await airdropContract.checkTokenAirdropDetails(1)
+      //	await truffleAsserts.reverts(airdropContract1.claimForTokens(1,[token1,token2],[token1Object.itemId,token2Object.itemId],[token1Object.amountToClaim,token2Object.amountToClaim],[token1Object.proof,token2Object.proof]),"MerkleDistributor: Drop already claimed or token not included.")
       const item33balance = await itemsFacet.balanceOfToken(
         diamondAddress,
-        gotchi2,
+        token2,
         33
       );
       const item34balance = await itemsFacet.balanceOfToken(
         diamondAddress,
-        gotchi1,
+        token1,
         34
       );
 
-      const itemEv = await airdropContract.areGotchisClaimed(
-        [gotchi1, gotchi2],
+      const itemEv = await airdropContract.areTokensClaimed(
+        [token1, token2],
         1
       );
       expect(itemEv[0]).to.equal(true);
@@ -317,7 +317,7 @@ describe("Test merkle", async function () {
       //make sure they are reduced
       expect(Citem33balance.toString()).to.equal("6");
       expect(Citem34balance.toString()).to.equal("4");
-      //const details1=await airdropContract.checkGotchiAirdropDetails(1)
+      //const details1=await airdropContract.checkTokenAirdropDetails(1)
       //const details2=await airdropContract.checkAddressAirdropDetails(0)
       //console.log(details1)
       //console.log(details2)

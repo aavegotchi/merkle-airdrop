@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-// Allows anyone/any gotchi to claim a token if they exist in a merkle root.
+// Allows anyone/any token to claim a token if they exist in a merkle root.
 interface IMerkleDistributor {
     struct AddressAirdrop {
         string name;
@@ -13,12 +13,12 @@ interface IMerkleDistributor {
         address tokenAddress;
     }
 
-    struct GotchiAirdrop {
+    struct TokenAirdrop {
         string name;
         uint256 airdropID;
         bytes32 merkleRoot;
         address tokenAddress;
-        uint256 maxGotchis;
+        uint256 maxTokens;
         uint256[] itemIDs;
         uint256 claims;
     }
@@ -31,7 +31,7 @@ interface IMerkleDistributor {
         uint256[] calldata _itemIDs
     ) external returns (string memory, address);
 
-    function addGotchiAirdrop(
+    function addTokenAirdrop(
         string memory _airdropName,
         bytes32 _merkleRoot,
         address _tokenAddress,
@@ -41,9 +41,9 @@ interface IMerkleDistributor {
 
     function isAddressClaimed(address _user, uint256 _airdropID) external view returns (bool);
 
-    function isGotchiClaimed(uint256 _airdropID, uint256 tokenId) external view returns (bool);
+    function isTokenClaimed(uint256 _airdropID, uint256 tokenId) external view returns (bool);
 
-    function areGotchisClaimed(uint256[] memory _gotchiIds, uint256 _airdropID) external view returns (bool[] memory);
+    function areTokensClaimed(uint256[] memory _tokenIds, uint256 _airdropID) external view returns (bool[] memory);
 
     function claimForAddress(
         uint256 _airdropId,
@@ -54,7 +54,7 @@ interface IMerkleDistributor {
         bytes calldata data
     ) external returns (address, uint256);
 
-    function claimForGotchis(
+    function claimForTokens(
         uint256 _airdropId,
         uint256[] calldata tokenIds,
         uint256[] calldata _itemIds,
@@ -64,7 +64,7 @@ interface IMerkleDistributor {
 
     function checkAddressAirdropDetails(uint256 _airdropID) external view returns (AddressAirdrop memory);
 
-    function checkGotchiAirdropDetails(uint256 _airdropID) external view returns (GotchiAirdrop memory);
+    function checkTokenAirdropDetails(uint256 _airdropID) external view returns (TokenAirdrop memory);
 
     function setRecevingContract(address _recevingContract) external;
 }

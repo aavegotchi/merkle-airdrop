@@ -13,23 +13,23 @@ struct AddressAirdrop {
     address tokenAddress;
 }
 
-struct GotchiAirdrop {
+struct TokenAirdrop {
     string name;
     uint256 airdropID;
     bytes32 merkleRoot;
     address tokenAddress;
-    uint256 maxGotchis;
+    uint256 maxTokens;
     uint256[] itemIDs;
     uint256 claims;
 }
 
 struct AppStorage {
     mapping(uint256 => AddressAirdrop) addressAirdrops;
-    mapping(uint256 => GotchiAirdrop) gotchiAirdrops;
+    mapping(uint256 => TokenAirdrop) tokenAirdrops;
     mapping(address => mapping(uint256 => bool)) addressClaims;
-    mapping(uint256 => mapping(uint256 => bool)) gotchiClaims;
+    mapping(uint256 => mapping(uint256 => bool)) tokenClaims;
     uint256 airdropCounter;
-    address gotchiContract;
+    address tokenContract;
 }
 
 library LibAppStorage {
@@ -48,8 +48,8 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyUnclaimedGotchi(uint256 tokenID, uint256 _airdropID) {
-        require(s.gotchiClaims[tokenID][_airdropID] == false, "MerkleDistributor: Drop already claimed or gotchi not included.");
+    modifier onlyUnclaimedToken(uint256 tokenID, uint256 _airdropID) {
+        require(s.tokenClaims[tokenID][_airdropID] == false, "MerkleDistributor: Drop already claimed or token not included.");
         _;
     }
 

@@ -10,9 +10,9 @@ import "../shared/ERC1155TokenReceiver.sol";
 
 contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
     event AddressAirdropCreated(string name, uint256 id, address tokenAddress);
-    event GotchiAirdropCreated(string name, uint256 id, address tokenAddress);
+    event TokenAirdropCreated(string name, uint256 id, address tokenAddress);
     event AddressClaim(uint256 airdropID, address account, uint256 itemId, uint256 amount);
-    event GotchiClaim(uint256 airdropID, uint256 gotchiID, uint256 itemId, uint256 amount);
+    event TokenClaim(uint256 airdropID, uint256 tokenID, uint256 itemId, uint256 amount);
 
     function addAddressAirdrop(
         string memory _airdropName,
@@ -35,22 +35,22 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         return (drop.airdropID);
     }
 
-    function addGotchiAirdrop(
+    function addTokenAirdrop(
         string memory _airdropName,
         bytes32 _merkleRoot,
         address _tokenAddress,
         uint256 _max,
         uint256[] calldata _itemIDs
     ) public onlyOwner returns (uint256) {
-        GotchiAirdrop storage drop = s.gotchiAirdrops[s.airdropCounter];
+        TokenAirdrop storage drop = s.tokenAirdrops[s.airdropCounter];
         drop.name = _airdropName;
         drop.airdropID = s.airdropCounter;
         drop.merkleRoot = _merkleRoot;
         drop.tokenAddress = _tokenAddress;
-        drop.maxGotchis = _max;
+        drop.maxTokens = _max;
         drop.itemIDs = _itemIDs;
         drop.claims = 0;
-        emit GotchiAirdropCreated(_airdropName, s.airdropCounter, _tokenAddress);
+        emit TokenAirdropCreated(_airdropName, s.airdropCounter, _tokenAddress);
         s.airdropCounter++;
         return (drop.airdropID);
     }
@@ -59,33 +59,33 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         return s.addressClaims[_user][_airdropID];
     }
 
-    function isGotchiClaimed(uint256 _airdropID, uint256 tokenId) public view returns (bool) {
-        return s.gotchiClaims[tokenId][_airdropID];
+    function isTokenClaimed(uint256 _airdropID, uint256 tokenId) public view returns (bool) {
+        return s.tokenClaims[tokenId][_airdropID];
     }
 
     function setAddressClaimed(address _user, uint256 _airdropID) private {
         s.addressClaims[_user][_airdropID] = true;
     }
 
-    function areGotchisClaimed(uint256[] memory _gotchiIds, uint256 _airdropID) public view returns (bool[] memory) {
-        GotchiAirdrop storage drop = s.gotchiAirdrops[_airdropID];
+    function areTokensClaimed(uint256[] memory _tokenIds, uint256 _airdropID) public view returns (bool[] memory) {
+        TokenAirdrop storage drop = s.tokenAirdrops[_airdropID];
 
-        require(drop.maxGotchis > 0, "Airdrop is not created yet");
+        require(drop.maxTokens > 0, "Airdrop is not created yet");
         //}
-        bool[] memory gStat = new bool[](_gotchiIds.length);
-        for (uint256 i; i < _gotchiIds.length; i++) {
-            if (isGotchiClaimed(_airdropID, _gotchiIds[i])) {
+        bool[] memory gStat = new bool[](_tokenIds.length);
+        for (uint256 i; i < _tokenIds.length; i++) {
+            if (isTokenClaimed(_airdropID, _tokenIds[i])) {
                 gStat[i] = true;
             }
-            if (!(isGotchiClaimed(_airdropID, _gotchiIds[i]))) {
+            if (!(isTokenClaimed(_airdropID, _tokenIds[i]))) {
                 gStat[i] = false;
             }
         }
         return gStat;
     }
 
-    function setGotchiClaimed(uint256 _tokenId, uint256 _airdropID) private {
-        s.gotchiClaims[_tokenId][_airdropID] = true;
+    function setTokenClaimed(uint256 _tokenId, uint256 _airdropID) private {
+        s.tokenClaims[_tokenId][_airdropID] = true;
     }
 
     function claimForAddress(
@@ -111,7 +111,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         emit AddressClaim(_airdropId, msg.sender, _itemId, _amount);
     }
 
-    struct GotchiClaimDetails {
+    struct TokenClaimDetails {
         uint256 tokenId;
         uint256 amount;
         uint256 itemId;
@@ -120,7 +120,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         bytes32 _node;
     }
 
-    function claimForGotchis(
+    function claimForTokens(
         uint256 _airdropId,
         uint256[] calldata tokenIds,
         uint256[] calldata _itemIds,
@@ -129,27 +129,27 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
     ) external {
         require(
             tokenIds.length == _itemIds.length && _itemIds.length == _amounts.length && merkleProofs.length == _itemIds.length,
-            "GotchiClaim: mismatched number of array elements"
+            "TokenClaim: mismatched number of array elements"
         );
 
-        GotchiAirdrop storage drop = s.gotchiAirdrops[_airdropId];
-        require(drop.maxGotchis > 0, "Airdrop is not created yet");
+        TokenAirdrop storage drop = s.tokenAirdrops[_airdropId];
+        require(drop.maxTokens > 0, "Airdrop is not created yet");
 
         bytes32 merkleRoot = drop.merkleRoot;
         address itemContract = drop.tokenAddress;
         for (uint256 index; index < tokenIds.length; index++) {
-            GotchiClaimDetails memory g;
+            TokenClaimDetails memory g;
             g.tokenId = tokenIds[index];
             g.amount = _amounts[index];
             g.itemId = _itemIds[index];
             g.tokenContract = itemContract;
             g.proof = merkleProofs[index];
             g._node = keccak256(abi.encodePacked(g.tokenId, g.itemId, g.amount));
-            if ((MerkleProof.verify(g.proof, merkleRoot, g._node)) && !(isGotchiClaimed(_airdropId, tokenIds[index]))) {
-                setGotchiClaimed(g.tokenId, _airdropId);
-                IItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.gotchiContract, g.tokenId, g.itemId, g.amount);
+            if ((MerkleProof.verify(g.proof, merkleRoot, g._node)) && !(isTokenClaimed(_airdropId, tokenIds[index]))) {
+                setTokenClaimed(g.tokenId, _airdropId);
+                IItemsTransferFacet(g.tokenContract).transferToParent(address(this), s.tokenContract, g.tokenId, g.itemId, g.amount);
                 drop.claims++;
-                emit GotchiClaim(_airdropId, tokenIds[index], _itemIds[index], _amounts[index]);
+                emit TokenClaim(_airdropId, tokenIds[index], _itemIds[index], _amounts[index]);
             }
         }
     }
@@ -158,11 +158,11 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         return s.addressAirdrops[_airdropID];
     }
 
-    function getGotchiAirdropDetails(uint256 _airdropID) public view returns (GotchiAirdrop memory) {
-        return s.gotchiAirdrops[_airdropID];
+    function getTokenAirdropDetails(uint256 _airdropID) public view returns (TokenAirdrop memory) {
+        return s.tokenAirdrops[_airdropID];
     }
 
-    function setRecevingContract(address _gotchiContract) public onlyOwner {
-        s.gotchiContract = _gotchiContract;
+    function setRecevingContract(address _tokenContract) public onlyOwner {
+        s.tokenContract = _tokenContract;
     }
 }
