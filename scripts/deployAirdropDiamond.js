@@ -7,9 +7,11 @@ async function deployDiamond() {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   console.log("Diamond owner is", contractOwner.address);
 
+  const gasPrice = 2000000000;
+
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
-  const diamondCutFacet = await DiamondCutFacet.deploy();
+  const diamondCutFacet = await DiamondCutFacet.deploy({ gasPrice: gasPrice });
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
@@ -18,14 +20,15 @@ async function deployDiamond() {
   const diamond = await Diamond.deploy(
     contractOwner.address,
     diamondCutFacet.address,
-    diamondAddress
+    diamondAddress,
+    { gasPrice: gasPrice }
   );
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
 
   // deploy DiamondInit
   const DiamondInit = await ethers.getContractFactory("DiamondInit");
-  const diamondInit = await DiamondInit.deploy();
+  const diamondInit = await DiamondInit.deploy({ gasPrice: gasPrice });
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
 
@@ -42,7 +45,7 @@ async function deployDiamond() {
 
   for (const FacetName of FacetNames) {
     const Facet = await ethers.getContractFactory(FacetName);
-    const facet = await Facet.deploy();
+    const facet = await Facet.deploy({ gasPrice: gasPrice });
     await facet.deployed();
     console.log(`${FacetName} deployed: ${facet.address}`);
     cut.push({
@@ -62,13 +65,23 @@ async function deployDiamond() {
   let receipt;
   // call to init function
   let functionCall = diamondInit.interface.encodeFunctionData("init");
-  tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
+  tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall, {
+    gasPrice: gasPrice,
+  });
   console.log("Diamond cut tx: ", tx.hash);
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Diamond upgrade failed: ${tx.hash}`);
   }
   console.log("Completed diamond cut");
+
+  const ownership = await ethers.getContractAt(
+    "OwnershipFacet",
+    diamond.address
+  );
+  const owner = await ownership.owner();
+  console.log("Owner:  ", owner);
+
   return diamond.address;
 }
 
