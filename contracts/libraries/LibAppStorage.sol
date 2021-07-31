@@ -48,11 +48,6 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyUnclaimedToken(uint256 tokenID, uint256 _airdropID) {
-        require(s.tokenClaims[tokenID][_airdropID] == false, "MerkleDistributor: Drop already claimed or token not included.");
-        _;
-    }
-
     modifier onlyOwner {
         LibDiamond.enforceIsContractOwner();
         _;

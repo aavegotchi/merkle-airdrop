@@ -162,7 +162,7 @@ contract MerkleAirdropFacet is Modifiers, ERC1155TokenReceiver {
         return s.tokenAirdrops[_airdropID];
     }
 
-    function setRecevingContract(address _tokenContract) public onlyOwner {
+    function setTokenContract(address _tokenContract) public onlyOwner {
         s.tokenContract = _tokenContract;
     }
 }
