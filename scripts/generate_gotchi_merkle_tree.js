@@ -11,13 +11,13 @@ function main() {
   var web3 = new Web3();
   let root;
   // import distribution from this file
-  const filename = "gen_files/gotchi_sample_list.csv";
+  const filename = "gen_files/H1Drop.csv";
 
   // what file should we write the merkel proofs too?
-  const output_file = "gen_files/gotchi_roots_staging.json";
+  const output_file = "gen_files/gotchi_roots_BgAIrdrop.json";
 
   //file that has the user claim list
-  const userclaimFile = "gen_files/gotchi_claimlist.json";
+  const userclaimFile = "gen_files/gotchi_BgDrop_claimlist.json";
 
   //contract of items being sent out
   const airdropContract = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";

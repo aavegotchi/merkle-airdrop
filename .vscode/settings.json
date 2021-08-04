@@ -1,3 +1,4 @@
 {
-    "solidity.compileUsingRemoteVersion": "v0.8.1+commit.df193b15"
+    "solidity.compileUsingRemoteVersion": "v0.8.1+commit.df193b15",
+    "python.formatting.provider": "yapf"
 }
