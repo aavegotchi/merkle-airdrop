@@ -16,8 +16,7 @@ async function addAirdrops() {
 
   let contractOwner = accounts[0];
 
-  console.log("Adding with the account", contractOwner.address);
-
+  //Merkle Diamond Address
   const diamondAddress = "0x75C8866f47293636F1C32eCBcD9168857dBEfc56";
 
   const ownerContract = await ethers.getContractAt(
@@ -26,6 +25,8 @@ async function addAirdrops() {
   );
 
   const owner = await ownerContract.owner();
+
+  console.log("Adding with the account", owner);
 
   let bgContractAddress;
 
@@ -38,10 +39,10 @@ async function addAirdrops() {
     });
     contractOwner = await ethers.getSigner(owner);
 
-    bgContractAddress = "0xA4fF399Aa1BB21aBdd3FC689f46CCE0729d58DEd";
+    bgContractAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   } else {
     //polygon mainnet
-    bgContractAddress = "0xA02d547512Bb90002807499F05495Fe9C4C3943f";
+    bgContractAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   }
 
   //merkleDropfacet
@@ -52,14 +53,16 @@ async function addAirdrops() {
   );
 
   //add first gotchi airdrop
+  /*
   await dropContract.addTokenAirdrop(
-    "H1 Background Airdrops", //airdrop name
+    "H1 Background", //airdrop name
     GotchiDropRoot, //merkle root
     bgContractAddress,
     10000, //total no of gotchis
     bgItem, //items to be claimed
     { gasPrice: gasPrice }
   );
+  */
 
   const airdrops = await dropContract.getTokenAirdropDetails("1");
   console.log("details:", airdrops);
