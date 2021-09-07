@@ -12,13 +12,13 @@ function main() {
 
   ///files for each ardrop
   // import distribution from this file
-  const filename = "gen_files/address_sample_dist_list.csv";
+  const filename = "gen_files/dropTicket/kinship_drop_tickets.csv";
 
   // what file should we write the merkel proofs too?
-  const output_file = "gen_files/encode_final_staging.json";
+  const output_file = "gen_files/dropTicket/drop_ticket_roots.json";
 
   //file that has the user claim list
-  const userclaimFile = "gen_files/user_claimlist.json";
+  const userclaimFile = "gen_files/dropTicket/drop_ticket_claimlist.json";
 
   //contract of items being sent out
   const airdropContract = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
